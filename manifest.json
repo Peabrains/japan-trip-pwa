@@ -1,0 +1,46 @@
+{
+  "name": "Japan Trip 2026",
+  "short_name": "Japan Trip",
+  "description": "Kumano Kodo → Alpine Route → Hakuba → Osaka · Apr 10–26",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#DDE0F4",
+  "theme_color": "#2B41B0",
+  "orientation": "portrait-primary",
+  "categories": ["travel", "lifestyle"],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Itinerary",
+      "url": "/?screen=itinerary",
+      "description": "View day-by-day itinerary"
+    },
+    {
+      "name": "Bookings",
+      "url": "/?screen=bookings",
+      "description": "Track booking status"
+    },
+    {
+      "name": "SOS Card",
+      "url": "/?screen=sos",
+      "description": "Emergency contacts and info"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+/* ============================================================
+   PRINT STYLESHEET — SOS card PDF export
+   Triggered by: window.print() from SOS screen
+   Hides everything except #sos-print-content
+   ============================================================ */
+
+@media print {
+  @page { size: A4; margin: 18mm 16mm; }
+
+  body * { visibility: hidden !important; }
+
+  #sos-print-content,
+  #sos-print-content * { visibility: visible !important; }
+
+  #sos-print-content {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+    font-size: 12pt;
+    color: #1C1A18;
+    background: #FFF;
+  }
+
+  .print-header {
+    border-bottom: 2pt solid #C84B35;
+    padding-bottom: 8pt;
+    margin-bottom: 14pt;
+  }
+  .print-title { font-size: 18pt; font-weight: 600; color: #C84B35; }
+  .print-sub   { font-size: 10pt; color: #5C5852; margin-top: 2pt; }
+
+  .print-section { margin-bottom: 14pt; }
+  .print-section-title { font-size: 8pt; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: #9C9690; border-bottom: 0.5pt solid #D8D4CC; padding-bottom: 3pt; margin-bottom: 6pt; }
+
+  .print-row { display: flex; justify-content: space-between; padding: 4pt 0; border-bottom: 0.3pt solid #E8E4DC; font-size: 11pt; }
+  .print-label { color: #5C5852; }
+  .print-value { font-weight: 500; text-align: right; max-width: 60%; }
+  .print-jp    { font-size: 10pt; color: #1C1A18; }
+
+  .print-emergency .print-value { color: #991B1B; font-size: 13pt; font-weight: 700; }
+
+  .print-footer { margin-top: 20pt; font-size: 9pt; color: #9C9690; border-top: 0.5pt solid #D8D4CC; padding-top: 6pt; }
+}
