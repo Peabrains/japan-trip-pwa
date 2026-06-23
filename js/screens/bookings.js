@@ -2,7 +2,7 @@
 
 const BookingsScreen = (() => {
   let root;
-  let activeTab = 'bookings'; // 'bookings' | 'budget' | 'packing'
+  let activeTab = 'bookings';
   let bookingFilter = 'all';
 
   const EXPENSE_CATS = ['Food','Transport','Accommodation','Activities','Shopping','Other'];
@@ -26,7 +26,6 @@ const BookingsScreen = (() => {
     const frag = document.createDocumentFragment();
     const { urgent, pending, booked } = Data.getStats();
 
-    // Stats row
     const stats = document.createElement('div');
     stats.className = 'booking-stats';
     stats.innerHTML = `
@@ -35,7 +34,6 @@ const BookingsScreen = (() => {
       <div class="stat-card"><span class="stat-num" style="color:var(--success-text)">${booked}</span><span class="stat-label">Booked</span></div>`;
     frag.appendChild(stats);
 
-    // Filter pills
     const pills = document.createElement('div');
     pills.className = 'pill-bar';
     pills.style.padding = '0 var(--s3) var(--s3)';
@@ -50,9 +48,9 @@ const BookingsScreen = (() => {
 
     const list = document.createElement('div');
     list.className = 'booking-list';
-    const items = Data.getBookingsList().filter(s => bookingFilter === 'all' || s.booking.status === bookingFilter);
     const statusCls = { booked:'badge-booked', pending:'badge-pending', urgent:'badge-urgent', open:'badge-open' };
     const statusLbl = { booked:'✓ Booked', pending:'Pending', urgent:'⚡ Urgent', open:'Open' };
+    const items = Data.getBookingsList().filter(s => bookingFilter === 'all' || s.booking.status === bookingFilter);
 
     if (!items.length) {
       list.innerHTML = `<div class="empty-state"><p class="empty-title">Nothing here</p><p class="empty-sub">All clear for this filter.</p></div>`;
@@ -81,12 +79,14 @@ const BookingsScreen = (() => {
     return frag;
   }
 
-  /* ═══ BUDGET TAB ════════════════════════════════════════ */
+  /* ═══ BUDGET TAB (fix #5 — split cost) ═════════════════ */
   function renderBudget() {
     const frag = document.createDocumentFragment();
+    const pax       = 2; // trip pax from config
     const totalJPY  = Data.getTotalSpentJPY();
     const budgetJPY = Config.BUDGET_MYR * Config.EXCHANGE_RATE_JPY;
     const pct       = Math.min(100, Math.round(totalJPY / budgetJPY * 100));
+    const perPerson = Math.round(totalJPY / pax);
 
     const header = document.createElement('div');
     header.className = 'budget-header';
@@ -95,11 +95,48 @@ const BookingsScreen = (() => {
         <p class="budget-spent">¥${totalJPY.toLocaleString()}</p>
         <p class="budget-of">of ¥${budgetJPY.toLocaleString()} (RM${Config.BUDGET_MYR.toLocaleString()})</p>
         <div class="budget-bar"><div class="budget-fill" style="width:${pct}%;background:${pct>90?'var(--danger-text)':pct>70?'var(--warning-text)':'var(--accent)'}"></div></div>
-        <p class="budget-remaining">¥${(budgetJPY - totalJPY).toLocaleString()} remaining · ${100 - pct}%</p>
+        <p class="budget-remaining">¥${(budgetJPY-totalJPY).toLocaleString()} remaining · ${100-pct}%</p>
+        <div class="split-badge">
+          <i class="ti ti-users" style="font-size:12px"></i>
+          <span>Per person (÷${pax}):</span>
+          <span class="split-amount">¥${perPerson.toLocaleString()}</span>
+          <span style="color:var(--text-muted)">≈ RM${Math.round(perPerson/Config.EXCHANGE_RATE_JPY).toLocaleString()}</span>
+        </div>
       </div>
-      <button class="btn btn-primary" id="add-expense-btn" style="flex-shrink:0">+ Add</button>`;
+      <button class="btn btn-primary" id="add-expense-btn" style="flex-shrink:0;align-self:flex-start">+ Add</button>`;
     frag.appendChild(header);
 
+    // Add expense form (hidden by default)
+    const addForm = document.createElement('div');
+    addForm.id = 'add-expense-form';
+    addForm.className = 'add-expense-form';
+    addForm.style.display = 'none';
+    addForm.innerHTML = `
+      <p class="form-title">Log expense</p>
+      <select id="exp-day" class="bs-input">
+        <option value="">Day…</option>
+        ${Data.getDays().map(d=>`<option value="${d.id}">${d.label} · ${d.date}</option>`).join('')}
+      </select>
+      <select id="exp-cat" class="bs-input">
+        <option value="">Category…</option>
+        ${EXPENSE_CATS.map(c=>`<option>${c}</option>`).join('')}
+      </select>
+      <input id="exp-desc" class="bs-input" type="text" placeholder="Description (e.g. Ramen at Ichiran)">
+      <input id="exp-amt" class="bs-input" type="number" placeholder="Amount (¥)">
+      <input id="exp-paid" class="bs-input" type="text" placeholder="Paid by (e.g. C, K, or Both)">
+      <div class="split-row">
+        <i class="ti ti-users" style="font-size:15px"></i>
+        <span>Split between</span>
+        <input id="exp-split" class="bs-input" type="number" value="${pax}" min="1" max="10" style="width:56px;text-align:center">
+        <span>pax</span>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary" id="exp-save" style="flex:1">Save</button>
+        <button class="btn btn-ghost" id="exp-cancel" style="flex:1">Cancel</button>
+      </div>`;
+    frag.appendChild(addForm);
+
+    // Expense list grouped by day
     const expenses = Data.getExpenses();
     if (!expenses.length) {
       const empty = document.createElement('div');
@@ -107,23 +144,30 @@ const BookingsScreen = (() => {
       empty.innerHTML = `<p class="empty-title">No expenses yet</p><p class="empty-sub">Tap + Add to log your first spend.</p>`;
       frag.appendChild(empty);
     } else {
-      // Group by day
       const byDay = {};
       expenses.forEach(e => { if (!byDay[e.dayId]) byDay[e.dayId]=[]; byDay[e.dayId].push(e); });
       Object.entries(byDay).forEach(([dayId, exps]) => {
-        const day    = Data.getDays().find(d => d.id === dayId);
+        const day     = Data.getDays().find(d => d.id === dayId);
         const dayTotal = exps.reduce((s,e) => s + e.amountJPY, 0);
         const sec = document.createElement('div');
         sec.className = 'expense-section';
         sec.innerHTML = `<div class="expense-day-header"><span>${day?.label || dayId} · ${day?.date || ''}</span><span>¥${dayTotal.toLocaleString()}</span></div>`;
         exps.forEach(exp => {
+          const splitPax  = exp.splitPax || pax;
+          const perHead   = Math.round(exp.amountJPY / splitPax);
           const row = document.createElement('div');
           row.className = 'expense-row';
           row.innerHTML = `
             <span class="expense-cat">${exp.category}</span>
-            <span class="expense-desc">${exp.description}</span>
-            <span class="expense-amt">¥${exp.amountJPY.toLocaleString()}</span>
-            <button class="expense-del" data-id="${exp.id}">×</button>`;
+            <div class="expense-info">
+              <p class="expense-desc">${exp.description}</p>
+              <p class="expense-split-line">${exp.paidBy ? `Paid by ${exp.paidBy} · ` : ''}÷${splitPax} = ¥${perHead.toLocaleString()} pp</p>
+            </div>
+            <div style="text-align:right;flex-shrink:0">
+              <p class="expense-amt">¥${exp.amountJPY.toLocaleString()}</p>
+              <p class="expense-per">¥${perHead.toLocaleString()} pp</p>
+            </div>
+            <button class="expense-del" data-id="${exp.id}" title="Remove">×</button>`;
           row.querySelector('.expense-del').addEventListener('click', async (e) => {
             e.stopPropagation();
             await Data.deleteExpense(exp.id);
@@ -136,48 +180,39 @@ const BookingsScreen = (() => {
       });
     }
 
-    // Add expense modal (inline below)
-    const addForm = document.createElement('div');
-    addForm.id = 'add-expense-form';
-    addForm.className = 'add-expense-form';
-    addForm.style.display = 'none';
-    addForm.innerHTML = `
-      <p class="form-title">Log expense</p>
-      <select id="exp-day" class="bs-input"><option value="">Day…</option>${Data.getDays().map(d=>`<option value="${d.id}">${d.label} · ${d.date}</option>`).join('')}</select>
-      <select id="exp-cat" class="bs-input"><option value="">Category…</option>${EXPENSE_CATS.map(c=>`<option>${c}</option>`).join('')}</select>
-      <input id="exp-desc" class="bs-input" type="text" placeholder="Description">
-      <input id="exp-amt" class="bs-input" type="number" placeholder="Amount (¥)">
-      <div style="display:flex;gap:8px;margin-top:8px">
-        <button class="btn btn-primary" id="exp-save" style="flex:1">Save</button>
-        <button class="btn btn-ghost" id="exp-cancel" style="flex:1">Cancel</button>
-      </div>`;
-    frag.appendChild(addForm);
-
+    // Wire add form after DOM is in place
     setTimeout(() => {
       root.querySelector('#add-expense-btn')?.addEventListener('click', () => {
-        addForm.style.display = addForm.style.display === 'none' ? 'block' : 'none';
+        const f = root.querySelector('#add-expense-form');
+        if (f) f.style.display = f.style.display === 'none' ? 'flex' : 'none';
       });
       root.querySelector('#exp-save')?.addEventListener('click', async () => {
-        const dayId = root.querySelector('#exp-day').value;
-        const cat   = root.querySelector('#exp-cat').value;
-        const desc  = root.querySelector('#exp-desc').value.trim();
-        const amt   = parseInt(root.querySelector('#exp-amt').value);
+        const dayId  = root.querySelector('#exp-day').value;
+        const cat    = root.querySelector('#exp-cat').value;
+        const desc   = root.querySelector('#exp-desc').value.trim();
+        const amt    = parseInt(root.querySelector('#exp-amt').value);
+        const paid   = root.querySelector('#exp-paid').value.trim();
+        const split  = parseInt(root.querySelector('#exp-split').value) || pax;
         if (!dayId || !cat || !desc || !amt) { Toast.show('Fill all fields', 'warning'); return; }
-        await Data.addExpense({ dayId, category:cat, description:desc, amountJPY:amt });
-        Toast.show(`¥${amt.toLocaleString()} logged`, 'success');
+        await Data.addExpense({ dayId, category:cat, description:desc, amountJPY:amt, paidBy:paid, splitPax:split });
+        Toast.show(`¥${amt.toLocaleString()} logged (¥${Math.round(amt/split).toLocaleString()} pp)`, 'success');
         render();
       });
-      root.querySelector('#exp-cancel')?.addEventListener('click', () => { addForm.style.display = 'none'; });
+      root.querySelector('#exp-cancel')?.addEventListener('click', () => {
+        const f = root.querySelector('#add-expense-form');
+        if (f) f.style.display = 'none';
+      });
     }, 0);
 
     return frag;
   }
 
-  /* ═══ PACKING TAB ═══════════════════════════════════════ */
+  /* ═══ PACKING TAB (fix #6 — add + delete) ══════════════ */
   function renderPacking() {
     const frag = document.createDocumentFragment();
     const items  = Data.getPackingItems();
     const done   = items.filter(i => i.checked).length;
+
     const header = document.createElement('div');
     header.className = 'packing-header';
     header.innerHTML = `<span>${done}/${items.length} packed</span><div class="budget-bar" style="flex:1;margin-left:12px"><div class="budget-fill" style="width:${items.length ? Math.round(done/items.length*100) : 0}%;background:var(--success-text)"></div></div>`;
@@ -188,17 +223,49 @@ const BookingsScreen = (() => {
       const sec = document.createElement('div');
       sec.className = 'packing-section';
       const doneInCat = catItems.filter(i=>i.checked).length;
-      sec.innerHTML = `<div class="packing-cat-header"><span>${cat}</span><span>${doneInCat}/${catItems.length}</span></div>`;
+      sec.innerHTML = `<div class="packing-cat-header"><span>${cat}</span><span style="color:var(--text-muted)">${doneInCat}/${catItems.length}</span></div>`;
+
       catItems.forEach(item => {
-        const row = document.createElement('label');
-        row.className = `packing-row ${item.checked ? 'packing-row--done' : ''} ${item.essential ? 'packing-row--essential' : ''}`;
-        row.innerHTML = `<input type="checkbox" ${item.checked ? 'checked' : ''} style="accent-color:var(--accent);width:16px;height:16px;flex-shrink:0"><span class="packing-item">${item.item}</span>${item.essential ? '<span class="packing-tag">Essential</span>' : ''}`;
+        const row = document.createElement('div');
+        row.className = `packing-row ${item.checked ? 'packing-row--done' : ''}`;
+        row.innerHTML = `
+          <input type="checkbox" ${item.checked?'checked':''} style="accent-color:var(--accent);width:16px;height:16px;flex-shrink:0;cursor:pointer">
+          <span class="packing-item">${item.item}</span>
+          ${item.essential ? '<span class="packing-tag">Essential</span>' : ''}
+          <button class="packing-del" data-id="${item.id}" title="Remove item">×</button>`;
+
         row.querySelector('input').addEventListener('change', async (e) => {
           await Data.togglePacking(item.id, e.target.checked);
           render();
         });
+        row.querySelector('.packing-del').addEventListener('click', async (e) => {
+          e.stopPropagation();
+          await Data.deletePacking(item.id);
+          Toast.show(`${item.item} removed`, 'info');
+          render();
+        });
         sec.appendChild(row);
       });
+
+      // Inline add row per category (fix #6)
+      const addRow = document.createElement('div');
+      addRow.className = 'packing-add-row';
+      addRow.innerHTML = `
+        <input type="text" class="packing-add-input" placeholder="Add item to ${cat}…" data-cat="${cat}">
+        <button class="packing-add-btn" data-cat="${cat}">Add</button>`;
+      addRow.querySelector('.packing-add-btn').addEventListener('click', async () => {
+        const input = addRow.querySelector('.packing-add-input');
+        const text  = input.value.trim();
+        if (!text) return;
+        await Data.addPackingItem({ cat, item: text, essential: false });
+        Toast.show(`${text} added`, 'success');
+        input.value = '';
+        render();
+      });
+      addRow.querySelector('.packing-add-input').addEventListener('keydown', async (e) => {
+        if (e.key === 'Enter') addRow.querySelector('.packing-add-btn').click();
+      });
+      sec.appendChild(addRow);
       frag.appendChild(sec);
     });
     return frag;
@@ -207,15 +274,18 @@ const BookingsScreen = (() => {
   /* ─── Main render ──────────────────────────────────────── */
   function render() {
     if (!root) return;
-    root.innerHTML = '';
-    root.appendChild(tabBar());
-    const content = document.createElement('div');
-    content.style.padding = '0 var(--s3)';
-
-    if (activeTab === 'bookings') content.appendChild(renderBookings());
-    else if (activeTab === 'budget') content.appendChild(renderBudget());
-    else content.appendChild(renderPacking());
-    root.appendChild(content);
+    try {
+      root.innerHTML = '';
+      root.appendChild(tabBar());
+      const content = document.createElement('div');
+      content.style.padding = '0 var(--s3)';
+      if (activeTab === 'bookings')  content.appendChild(renderBookings());
+      else if (activeTab === 'budget') content.appendChild(renderBudget());
+      else                             content.appendChild(renderPacking());
+      root.appendChild(content);
+    } catch(e) {
+      console.error('[BookingsScreen.render]', e);
+    }
   }
 
   return {
