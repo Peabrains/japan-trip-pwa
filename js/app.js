@@ -157,16 +157,14 @@ const App = (() => {
 
   /* ─── Connectivity ───────────────────────────────────────── */
   function watchConnectivity() {
-    const update = async () => {
-      if (navigator.onLine) {
-        updateSyncStatus('synced');
-        if (Config.GAS_URL) await Sync.push();
-      } else {
-        updateSyncStatus('offline');
+    window.addEventListener('online', async () => {
+      if (Config.GAS_URL) {
+        const queue = await DB.loadQueue().catch(() => []);
+        if (queue.length) await Sync.push();
+        else updateSyncStatus('synced');
       }
-    };
-    window.addEventListener('online', update);
-    window.addEventListener('offline', update);
+    });
+    window.addEventListener('offline', () => updateSyncStatus('offline'));
   }
 
   /* ─── Service worker ─────────────────────────────────────── */
@@ -185,7 +183,7 @@ const App = (() => {
 
     watchConnectivity();
     updateUrgentBadge();
-    updateSyncStatus(navigator.onLine ? 'synced' : 'offline');
+    updateSyncStatus(Config.GAS_URL && navigator.onLine ? 'syncing' : 'offline');
 
     // Render stamp banner once into its persistent container
     renderStampBanner();

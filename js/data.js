@@ -8,7 +8,7 @@ const DAYS=[
   {id:'d3', label:'D3', date:'Wed 14 Apr',title:'Hongu Taisha + Yunomine'},
   {id:'d4', label:'D4', date:'Thu 15 Apr',title:'Kawayu rest day'},
   {id:'d5', label:'D5', date:'Fri 16 Apr',title:'Riverboat → Katsuura'},
-  {id:'d6', label:'D6', date:'Sat 17 Apr',title:'Nachi → Nagoya'},
+  {id:'d6', label:'D6', date:'Sat 17 Apr',title:'Nachi → Toyama'},
   {id:'d7', label:'D7', date:'Sun 18 Apr',title:'Kurobe Alpine Route'},
   {id:'d8', label:'D8', date:'Mon 19 Apr',title:'Alpine Route → Hakuba'},
   {id:'d9', label:'D9', date:'Tue 20 Apr',title:'Snowshoe · Tsugaike'},
@@ -37,11 +37,13 @@ const SEED_STOPS=[
   {id:'s17',dayId:'d5',order:3,segment:'kumano',name:'Kii-Katsuura',activity:'Coastal onsen town · tuna market visit',transport:'JR Kisei Line Shingu → Kii-Katsuura · ~25 min · JR Pass ✓',transportType:'train',time:'~13:00',timeZone:'JST',accommodation:'Central Katsuura (TBD)',notes:'Tuna market best early morning',lat:33.6282,lng:135.9414,hasStamp:false,isSanzan:false,trainDetail:{service:'JR Kisei Line',jrPass:true},booking:{status:'pending',ref:'',cost:null,deadline:'2027-02-01'}},
   {id:'s18',dayId:'d6',order:1,segment:'kumano',name:'Daimon-zaka',activity:'Ancient cedar-lined stone staircase · 267 steps',transport:'Katsuura Station → Nachi bus stop (Kumano Kotsu) · ~20 min · ~¥420',transportType:'bus',time:'~09:00',timeZone:'JST',accommodation:null,notes:'Bus departs Katsuura ~08:30',lat:33.6713,lng:135.8976,hasStamp:true,stampKanji:'大門',stampRomaji:'Daimon-zaka',isSanzan:false,booking:{status:'open',ref:'',cost:null,deadline:null}},
   {id:'s19',dayId:'d6',order:2,segment:'kumano',name:'Kumano Nachi Taisha',activity:'Third Kumano Sanzan stamp · full set complete',transport:'On foot up from Daimon-zaka · ~20 min',transportType:'walk',time:'~10:00',timeZone:'JST',accommodation:null,notes:'Pagoda + waterfall view · Nachi Falls nearby',lat:33.6687,lng:135.8901,hasStamp:true,stampKanji:'那智',stampRomaji:'Nachi',isSanzan:true,sanzanNum:3,booking:{status:'open',ref:'',cost:null,deadline:null}},
-  {id:'s20',dayId:'d6',order:3,segment:'osaka',name:'Nagoya',activity:'Overnight stop heading north for Alpine Route',transport:'Kii-Katsuura → Nagoya · JR Kisei + Nanki Ltd Express · ~4 hrs · depart ~12:25 · JR Pass ✓',transportType:'train',time:'~12:25',timeZone:'JST',accommodation:'Nagoya (TBD)',notes:'Or take Shinkansen from Shin-Osaka if time allows',lat:35.1709,lng:136.8815,hasStamp:false,isSanzan:false,trainDetail:{service:'Nanki Ltd Express → Tokaido Shinkansen',jrPass:true},booking:{status:'open',ref:'',cost:null,deadline:null}},
-  {id:'s21',dayId:'d7',order:1,segment:'alpine',name:'Tateyama Station',activity:'Alpine Route start · Tateyama Cable Car then highland bus across snow corridor',transport:'Toyama → Tateyama · Toyama Chiho Railway · ~1 hr · ~¥1,230',transportType:'cable',time:'~07:30',timeZone:'JST',accommodation:null,notes:'13–18 m snow walls expected in April · first cable car ~07:30',lat:36.5833,lng:137.4455,hasStamp:false,isSanzan:false,booking:{status:'open',ref:'',cost:null,deadline:null}},
-  {id:'s22',dayId:'d7',order:2,segment:'alpine',name:'Kurobe Dam',activity:'Trolleybus + cable car + dam walk · Japan\'s highest dam at 186 m',transport:'Tateyama → Daikanbo (cable car) → Kurobe (ropeway) → dam',transportType:'cable',time:'~11:00',timeZone:'JST',accommodation:null,notes:'Route ticket ~¥9,000 per person',lat:36.5675,lng:137.6650,hasStamp:false,isSanzan:false,booking:{status:'open',ref:'',cost:null,deadline:null}},
-  {id:'s23',dayId:'d7',order:3,segment:'alpine',name:'Ogizawa',activity:'Exit point of Alpine Route · electric bus terminal',transport:'Kurobe Dam → Ogizawa · Electric bus · ~16 min · ¥1,340',transportType:'bus',time:'~14:00',timeZone:'JST',accommodation:null,notes:'Luggage forwarding service available ~¥4,400',lat:36.5592,lng:137.7210,hasStamp:false,isSanzan:false,booking:{status:'open',ref:'',cost:null,deadline:null}},
-  {id:'s24',dayId:'d7',order:4,segment:'hakuba',name:'Shinano-Omachi',activity:'Overnight — better dining than Ogizawa',transport:'Ogizawa → Shinano-Omachi · Alpico bus · ~40 min · last bus 17:05 · ~¥1,370',transportType:'bus',time:'~15:10',timeZone:'JST',accommodation:'Shinano-Omachi (TBD)',notes:'Miss the last bus and you\'re stuck at Ogizawa',lat:36.4999,lng:137.8613,hasStamp:false,isSanzan:false,booking:{status:'open',ref:'',cost:null,deadline:null}},
+  {id:'s20',dayId:'d6',order:3,segment:'osaka',name:'Nagoya (transfer)',activity:'Transit stop — change trains heading north to Toyama',transport:'Kii-Katsuura → Nagoya · JR Kisei + Nanki Ltd Express · ~4 hrs · depart ~12:25 · JR Pass ✓',transportType:'train',time:'~12:25',timeZone:'JST',accommodation:null,notes:'Transfer at Nagoya to Wide View Hida · allow 30 min',lat:35.1709,lng:136.8815,hasStamp:false,isSanzan:false,trainDetail:{service:'Nanki Ltd Express',jrPass:true},booking:{status:'open',ref:'',cost:null,deadline:null}},
+  {id:'s20a',dayId:'d6',order:4,segment:'alpine',name:'Toyama',activity:'Arrive Toyama — overnight before Alpine Route',transport:'Wide View Hida Ltd Express from Nagoya · ~2h45min · JR Pass ✓ · depart Nagoya ~16:43 · arrive Toyama ~19:25',transportType:'train',time:'~19:25',timeZone:'JST',accommodation:'Toyama (TBD)',notes:'Early night — Alpine Route requires early start tomorrow',lat:36.6953,lng:137.2136,hasStamp:false,isSanzan:false,trainDetail:{service:'Wide View Hida Ltd Express',jrPass:true,platform:'Platform at Nagoya — check board'},booking:{status:'open',ref:'',cost:null,deadline:null}},
+  {id:'s20c',dayId:'d7',order:1,segment:'alpine',name:'Toyama → Tateyama',activity:'Switch to private Tateyama Kurobe Alpine Route railway',transport:'Toyama Chiho Tetsudo · ~55 min · ¥1,230 · NOT on JR Pass · depart Toyama ~10:40',transportType:'train',time:'10:40',timeZone:'JST',accommodation:null,notes:'Buy ticket at Toyama Station · separate from JR Pass',lat:36.5833,lng:137.4455,hasStamp:false,isSanzan:false,trainDetail:{service:'Toyama Chiho Tetsudo',jrPass:false,platform:'Toyama Chiho line platform at Toyama Station'},booking:{status:'open',ref:'',cost:null,deadline:null}},
+  {id:'s21',dayId:'d7',order:2,segment:'alpine',name:'Tateyama · Alpine Route begins',activity:'Cable car to Bijodaira then highland bus through snow corridor to Murodo',transport:'Tateyama Cable Car ~7 min then Highland Bus to Murodo ~50 min · buy full route ticket here',transportType:'cable',time:'~11:40',timeZone:'JST',accommodation:null,notes:'Snow walls 13-18m in April · full route ticket ~¥9,000pp purchased at Tateyama',lat:36.5833,lng:137.4455,hasStamp:false,isSanzan:false,booking:{status:'open',ref:'',cost:null,deadline:null}},
+  {id:'s22',dayId:'d7',order:3,segment:'alpine',name:'Kurobe Dam',activity:'Trolleybus + cable car + dam walk · Japan\'s highest dam at 186 m',transport:'Tateyama → Daikanbo (cable car) → Kurobe (ropeway) → dam',transportType:'cable',time:'~11:00',timeZone:'JST',accommodation:null,notes:'Route ticket ~¥9,000 per person',lat:36.5675,lng:137.6650,hasStamp:false,isSanzan:false,booking:{status:'open',ref:'',cost:null,deadline:null}},
+  {id:'s23',dayId:'d7',order:4,segment:'alpine',name:'Ogizawa',activity:'Exit point of Alpine Route · electric bus terminal',transport:'Kurobe Dam → Ogizawa · Electric bus · ~16 min · ¥1,340',transportType:'bus',time:'~14:00',timeZone:'JST',accommodation:null,notes:'Luggage forwarding service available ~¥4,400',lat:36.5592,lng:137.7210,hasStamp:false,isSanzan:false,booking:{status:'open',ref:'',cost:null,deadline:null}},
+  {id:'s24',dayId:'d7',order:5,segment:'hakuba',name:'Shinano-Omachi',activity:'Overnight — better dining than Ogizawa',transport:'Ogizawa → Shinano-Omachi · Alpico bus · ~40 min · last bus 17:05 · ~¥1,370',transportType:'bus',time:'~15:10',timeZone:'JST',accommodation:'Shinano-Omachi (TBD)',notes:'Miss the last bus and you\'re stuck at Ogizawa',lat:36.4999,lng:137.8613,hasStamp:false,isSanzan:false,booking:{status:'open',ref:'',cost:null,deadline:null}},
   {id:'s25',dayId:'d8',order:1,segment:'hakuba',name:'Shinano-Omachi → Hakuba',activity:'Short hop to Hakuba — check in early afternoon',transport:'JR Oito Line · ~40 min · JR Pass ✓ · Platform 1',transportType:'train',time:'~09:00',timeZone:'JST',accommodation:'The Happo Hakuba or Evo Brand',notes:'',lat:36.6982,lng:137.8619,hasStamp:false,isSanzan:false,trainDetail:{service:'JR Oito Line',jrPass:true,platform:'Platform 1 at Shinano-Omachi'},booking:{status:'pending',ref:'',cost:null,deadline:'2027-02-01'}},
   {id:'s26',dayId:'d9',order:1,segment:'hakuba',name:'Tsugaike Kogen',activity:'Guided snowshoe trek · deep April snowpack',transport:'Hakuba → Tsugaike Kogen Gondola · local shuttle or taxi ~15 min',transportType:'bus',time:'~09:00',timeZone:'JST',accommodation:'Hakuba (same)',notes:'Book local outdoor operator · gear included in most packages',lat:36.7492,lng:137.8661,hasStamp:false,isSanzan:false,booking:{status:'open',ref:'',cost:null,deadline:null}},
   {id:'s27',dayId:'d10',order:1,segment:'hakuba',name:'Oide Park',activity:'Cherry blossom against Shirouma Sanzan peaks',transport:'15 min walk from Hakuba Station',transportType:'walk',time:'~09:00',timeZone:'JST',accommodation:null,notes:'Peak bloom typically late April — confirm closer to date',lat:36.6964,lng:137.8737,hasStamp:false,isSanzan:false,booking:{status:'open',ref:'',cost:null,deadline:null}},
@@ -216,6 +218,27 @@ const Data={
       booked:STOPS.filter(s=>s.booking.status==='booked').length,
       total:STOPS.length,
     };
+  },
+
+  async addStop({dayId,name,activity='',time='',transport='',transportType:tt=null,accommodation=null,notes=''}){
+    const existing = STOPS.filter(s=>s.dayId===dayId);
+    const order = existing.length ? Math.max(...existing.map(s=>s.order))+1 : 1;
+    const stop = {
+      id:'s_'+Date.now(),dayId,order,segment:'kumano',
+      name,activity,transport,transportType:tt,
+      time,timeZone:'JST',accommodation,notes,
+      lat:null,lng:null,hasStamp:false,isSanzan:false,
+      booking:{status:'open',ref:'',cost:null,deadline:null},
+    };
+    STOPS.push(stop);
+    await DB.saveStop(stop);
+    await DB.queueChange({action:'addStop',stop});
+    return stop;
+  },
+
+  async deleteStop(id){
+    STOPS=STOPS.filter(s=>s.id!==id);
+    await DB.queueChange({action:'deleteStop',id});
   },
   getSOS:()=>SOS_DATA,
 };
