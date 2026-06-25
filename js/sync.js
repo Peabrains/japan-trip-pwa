@@ -71,34 +71,35 @@ const Sync = (() => {
   }
 
   /* ─── Apply remote data to local state ──────────────────── */
+  /* ─── ID-based merge helpers ─────────────────────────────── */
+  const DAY_ORDER = ['d-1','d0','d1','d2','d3','d4','d5','d6','d7','d8','d9','d10','d11','d12'];
+
+  function mergeById(local, remote) {
+    const remoteMap = {};
+    remote.forEach(r => { remoteMap[r.id] = r; });
+    const merged = local.map(l => remoteMap[l.id] ? { ...l, ...remoteMap[l.id] } : l);
+    remote.forEach(r => { if (!merged.find(l => l.id === r.id)) merged.push(r); });
+    return merged;
+  }
+
+  function mergeStops(remote) {
+    const merged = mergeById(Data.getStops(), remote);
+    return merged.sort((a,b) => {
+      const dd = DAY_ORDER.indexOf(a.dayId) - DAY_ORDER.indexOf(b.dayId);
+      return dd !== 0 ? dd : (a.order||0) - (b.order||0);
+    });
+  }
+
   function applyRemote(record) {
     if (!record) return;
     let changed = false;
 
-    /* Stops — use merge strategy: never replace more with fewer */
+    /* Stops — ID-based merge, never drops local-only additions */
     if (record.stops) {
       try {
         const remote = JSON.parse(record.stops);
         if (remote.length) {
-          const local = Data.getStops();
-          if (remote.length >= local.length * 0.8) {
-            // Remote has enough stops — full replace, sort by day+order
-            const dayOrder = ['d-1','d0','d1','d2','d3','d4','d5','d6','d7','d8','d9','d10','d11','d12'];
-            remote.sort((a,b) => {
-              const dd = dayOrder.indexOf(a.dayId) - dayOrder.indexOf(b.dayId);
-              return dd !== 0 ? dd : (a.order||0) - (b.order||0);
-            });
-            Data.setStops(remote);
-          } else {
-            // Remote is sparse — merge into local
-            const merged = [...local];
-            remote.forEach(r => {
-              const idx = merged.findIndex(s => s.id === r.id);
-              if (idx >= 0) merged[idx] = { ...merged[idx], ...r };
-              else merged.push(r);
-            });
-            Data.setStops(merged);
-          }
+          Data.setStops(mergeStops(remote));
           changed = true;
         }
       } catch(e) { console.warn('[Sync] parse stops:', e); }
@@ -108,17 +109,7 @@ const Sync = (() => {
     if (record.expenses) {
       try {
         const remote = JSON.parse(record.expenses);
-        const local  = Data.getExpenses();
-        if (remote.length >= local.length) {
-          Data.setExpenses(remote);
-        } else {
-          const merged = [...local];
-          remote.forEach(r => {
-            const idx = merged.findIndex(e => e.id === r.id);
-            if (idx >= 0) merged[idx] = r; else merged.push(r);
-          });
-          Data.setExpenses(merged);
-        }
+        Data.setExpenses(mergeById(Data.getExpenses(), remote));
         changed = true;
       } catch(e) { console.warn('[Sync] parse expenses:', e); }
     }
@@ -127,17 +118,7 @@ const Sync = (() => {
     if (record.packing) {
       try {
         const remote = JSON.parse(record.packing);
-        const local  = Data.getPackingItems();
-        if (remote.length >= local.length * 0.8) {
-          Data.setPackingItems(remote);
-        } else {
-          const merged = [...local];
-          remote.forEach(r => {
-            const idx = merged.findIndex(p => p.id === r.id);
-            if (idx >= 0) merged[idx] = r; else merged.push(r);
-          });
-          Data.setPackingItems(merged);
-        }
+        Data.setPackingItems(mergeById(Data.getPackingItems(), remote));
         changed = true;
       } catch(e) { console.warn('[Sync] parse packing:', e); }
     }

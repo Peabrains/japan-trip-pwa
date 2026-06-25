@@ -176,8 +176,8 @@ const BookingsScreen = (() => {
             <span class="badge badge-open" style="font-size:9px;padding:1px 5px">${day?.label||''}</span>
             <span style="font-size:var(--text-xs);color:var(--text-muted)">${day?.date||''}</span>
           </div>
-          <p style="font-size:var(--text-sm);font-weight:500;color:var(--text-primary)">${td.service||stop.name}</p>
-          ${td.origin&&td.destination?`<p style="font-size:var(--text-xs);color:var(--text-secondary);margin-top:2px">${td.origin} → ${td.destination}</p>`:''}
+          <p style="font-size:var(--text-sm);font-weight:500;color:var(--text-primary)">${td.origin&&td.destination?td.origin+' → '+td.destination:(td.service||stop.name)}</p>
+          ${td.service?`<p style="font-size:var(--text-xs);color:var(--text-muted);margin-top:1px">${td.service}</p>`:''}
           <p style="font-size:var(--text-xs);color:var(--text-secondary);margin-top:2px">
             Depart: ${stop.time||'TBD'} · Arrive: ${td.arriveTime||'TBD'} · ${td.duration||''}
           </p>
@@ -187,8 +187,8 @@ const BookingsScreen = (() => {
 
         // Build share text
         shareText += `${day?.label||''} · ${day?.date||''}\n`;
-        shareText += `  ${td.service||stop.name}\n`;
-        if (td.origin&&td.destination) shareText += `  ${td.origin} → ${td.destination}\n`;
+        shareText += `  ${td.origin&&td.destination ? td.origin+' → '+td.destination : (td.service||stop.name)}\n`;
+        if (td.service) shareText += `  ${td.service}\n`;
         shareText += `  Depart: ${stop.time||'TBD'}  Arrive: ${td.arriveTime||'TBD'}  ${td.duration||''}\n`;
         if (td.trainNumber) shareText += `  Train no: ${td.trainNumber}\n`;
         shareText += `  ${td.jrPass===false?'NOT on JR Pass':'JR Pass ✓'} · Seat reservation required\n\n`;

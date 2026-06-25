@@ -126,9 +126,13 @@ const BottomSheet = (() => {
           </div>
           ${field('Origin','e-origin',stop.trainDetail?.origin||'','text','e.g. Shin-Osaka')}
           ${field('Destination','e-destination',stop.trainDetail?.destination||'','text','e.g. Kii-Tanabe')}
-          ${field('Arrive time','e-arrive',stop.trainDetail?.arriveTime||'','text','e.g. 11:52 or TBD')}
+          ${field('Arrive time','e-arrive',/^\d{2}:\d{2}$/.test(stop.trainDetail?.arriveTime||'')?stop.trainDetail.arriveTime:'','time')}
+          <div class="bs-edit-group" style="display:flex;align-items:center;gap:var(--s3)">
+            <label class="bs-edit-label" style="margin-bottom:0">Duration</label>
+            <span id="e-duration-display" style="font-size:var(--text-sm);font-weight:500;color:var(--accent)">—</span>
+            <input id="e-duration" type="hidden" value="${stop.trainDetail?.duration||''}">
+          </div>
           ${field('Train number','e-trainno',stop.trainDetail?.trainNumber||'','text','e.g. Kuroshio 5')}
-          ${field('Duration','e-duration',stop.trainDetail?.duration||'','text','e.g. ~2 hrs')}
         </div>
         <p class="bs-section-head">Reservation</p>
         <div class="bs-edit-group" style="display:flex;align-items:center;gap:var(--s3)">
@@ -195,9 +199,13 @@ const BottomSheet = (() => {
           </div>
           ${field('Origin (boarding station)','a-origin','','text','e.g. Shin-Osaka')}
           ${field('Destination (alighting)','a-destination','','text','e.g. Kii-Tanabe')}
-          ${field('Arrive time','a-arrive','','text','e.g. 11:52 or TBD')}
+          ${field('Arrive time','a-arrive','','time')}
+          <div class="bs-edit-group" style="display:flex;align-items:center;gap:var(--s3)">
+            <label class="bs-edit-label" style="margin-bottom:0">Duration</label>
+            <span id="a-duration-display" style="font-size:var(--text-sm);font-weight:500;color:var(--accent)">—</span>
+            <input id="a-duration" type="hidden" value="">
+          </div>
           ${field('Train number','a-trainno','','text','e.g. Kuroshio 5 or TBD')}
-          ${field('Duration','a-duration','','text','e.g. ~2 hrs')}
         </div>
         <p class="bs-section-head" style="margin-top:var(--s3)">Reservation</p>
         <div class="bs-edit-group" style="display:flex;align-items:center;gap:var(--s3)">
@@ -213,6 +221,32 @@ const BottomSheet = (() => {
           <button class="btn btn-ghost bs-full-btn" id="bs-addcancel-btn">Cancel</button>
         </div>
       </div>`;
+  }
+
+  /* ─── Duration auto-calculator ──────────────────────────── */
+  function calcDuration(depart, arrive) {
+    if (!depart || !arrive) return '';
+    const toM = t => { const [h,m] = t.split(':').map(Number); return h*60+m; };
+    let d = toM(depart), a = toM(arrive);
+    if (a <= d) a += 1440; // overnight
+    const diff = a - d;
+    const h = Math.floor(diff/60), m = diff%60;
+    return h && m ? h+'h '+m+'min' : h ? h+'h' : m+'min';
+  }
+
+  function wireAutoduration(departId, arriveId, displayId, hiddenId) {
+    const update = () => {
+      const d = body.querySelector('#'+departId)?.value;
+      const a = body.querySelector('#'+arriveId)?.value;
+      const calc = calcDuration(d, a);
+      const disp = body.querySelector('#'+displayId);
+      const hid  = body.querySelector('#'+hiddenId);
+      if (disp) disp.textContent = calc || '—';
+      if (hid)  hid.value = calc;
+    };
+    body.querySelector('#'+departId)?.addEventListener('change', update);
+    body.querySelector('#'+arriveId)?.addEventListener('change', update);
+    update();
   }
 
   /* ─── Wire: stop view ────────────────────────────────────── */
@@ -249,6 +283,7 @@ const BottomSheet = (() => {
       if (block) block.style.display = ['train','plane','boat'].includes(type) ? 'block' : 'none';
     }
     editTType?.addEventListener('change', updateEditTrainBlock);
+    wireAutoduration('e-time', 'e-arrive', 'e-duration-display', 'e-duration');
     body.querySelector('#bs-save-btn')?.addEventListener('click', async () => {
       const hasTrain = ['train','plane','boat'].includes(g('e-ttype')||stop.transportType);
       const patch = {
@@ -267,9 +302,9 @@ const BottomSheet = (() => {
           seatReservation: body.querySelector('#e-seatres')?.checked || false,
           origin:         g('e-origin'),
           destination:    g('e-destination'),
-          arriveTime:     g('e-arrive'),
+          arriveTime:     body.querySelector('#e-arrive')?.value || '',
           trainNumber:    g('e-trainno'),
-          duration:       g('e-duration'),
+          duration:       body.querySelector('#e-duration')?.value || stop.trainDetail?.duration || '',
         } : stop.trainDetail,
         booking: { ...stop.booking, status:g('e-status')||stop.booking.status, ref:g('e-ref'), cost:parseInt(g('e-cost'))||null, deadline:g('e-deadline')||null },
       };
@@ -305,6 +340,7 @@ const BottomSheet = (() => {
     }
     tTypeSelect?.addEventListener('change', updateTrainBlock);
     updateTrainBlock(); // run on open too
+    wireAutoduration('a-time', 'a-arrive', 'a-duration-display', 'a-duration');
 
     body.querySelector('#bs-add-btn')?.addEventListener('click', async () => {
       const name = g('a-name');
@@ -315,9 +351,9 @@ const BottomSheet = (() => {
         seatReservation: body.querySelector('#a-seatres')?.checked || false,
         origin:      g('a-origin'),
         destination: g('a-destination'),
-        arriveTime:  g('a-arrive'),
+        arriveTime:  body.querySelector('#a-arrive')?.value || '',
         trainNumber: g('a-trainno'),
-        duration:    g('a-duration'),
+        duration:    body.querySelector('#a-duration')?.value || '',
       } : null;
       await Data.addStop({
         dayId: g('a-day')||dayId, name,
