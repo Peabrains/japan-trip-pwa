@@ -106,7 +106,16 @@ const MapScreen = (() => {
       maxZoom:18,
     }).addTo(map);
 
-    renderAll();
+    // Wait for layout to settle (fixed nav changes container dimensions)
+    // then force Leaflet to recalculate container size and re-render tiles
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (map) {
+          map.invalidateSize();
+          renderAll();
+        }
+      });
+    });
   }
 
   return {
