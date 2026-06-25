@@ -3,6 +3,7 @@
 const BookingsScreen = (() => {
   let root;
   let activeTab = 'reservations';
+  const sectionsOpen = { accommodation: true, transport: true, activities: true };
   const EXPENSE_CATS = ['Food','Transport','Accommodation','Activities','Shopping','Other'];
 
   /* ─── Tab bar ────────────────────────────────────────────── */
@@ -22,20 +23,49 @@ const BookingsScreen = (() => {
   /* ═══ RESERVATIONS TAB ══════════════════════════════════ */
   function renderReservations() {
     const frag = document.createDocumentFragment();
-    frag.appendChild(renderAccommodation());
-    frag.appendChild(renderTransport());
-    frag.appendChild(renderActivities());
+    const nights = Data.getDays().map(d=>({day:d,o:Data.getOvernight(d.id)})).filter(({o})=>o?.name);
+    const booked = nights.filter(({o})=>o.status==='booked').length;
+    const transStops = Data.getTransportReservations();
+    const actStops = Data.getActivityReservations();
+    frag.appendChild(accordionSection('accommodation',
+      '🏨 Accommodation', `${booked}/${nights.length} confirmed`,
+      renderAccommodationContent));
+    frag.appendChild(accordionSection('transport',
+      '🚄 Transport', `${transStops.length} to track`,
+      renderTransportContent));
+    frag.appendChild(accordionSection('activities',
+      '🎌 Activities', `${actStops.length} to book`,
+      renderActivitiesContent));
     return frag;
   }
 
-  /* ─── Section header helper ──────────────────────────────── */
-  function sectionHead(title, count) {
-    const div = document.createElement('div');
-    div.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:var(--s4) 0 var(--s2);margin-top:var(--s2)';
-    div.innerHTML = `
-      <p style="font-size:var(--text-sm);font-weight:500;color:var(--text-primary)">${title}</p>
-      <span style="font-size:var(--text-xs);color:var(--text-muted)">${count} items</span>`;
-    return div;
+  /* ─── Accordion section wrapper ──────────────────────────── */
+  function accordionSection(key, title, subtitle, renderContentFn) {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'border:1.5px solid var(--border);border-radius:var(--r-lg);margin-bottom:var(--s2);overflow:hidden';
+
+    const header = document.createElement('div');
+    header.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:12px var(--s3);cursor:pointer;background:var(--surface);-webkit-tap-highlight-color:transparent';
+    const isOpen = sectionsOpen[key];
+    header.innerHTML = `
+      <div>
+        <p style="font-size:var(--text-sm);font-weight:500;color:var(--text-primary)">${title}</p>
+        <p style="font-size:var(--text-xs);color:var(--text-muted);margin-top:1px">${subtitle}</p>
+      </div>
+      ${isOpen ? Icons.chevronUp('icon-sm') : Icons.chevronDown('icon-sm')}`;
+    header.addEventListener('click', () => {
+      sectionsOpen[key] = !sectionsOpen[key];
+      render();
+    });
+    wrap.appendChild(header);
+
+    if (isOpen) {
+      const body = document.createElement('div');
+      body.style.cssText = 'padding:var(--s2) var(--s3) var(--s3);border-top:1px solid var(--border-subtle)';
+      body.appendChild(renderContentFn());
+      wrap.appendChild(body);
+    }
+    return wrap;
   }
 
   function statusBadge(status) {
@@ -45,7 +75,7 @@ const BookingsScreen = (() => {
   }
 
   /* ─── Accommodation ──────────────────────────────────────── */
-  function renderAccommodation() {
+  function renderAccommodationContent() {
     const frag = document.createDocumentFragment();
     const nights = Data.getDays().map(d=>({day:d,o:Data.getOvernight(d.id)})).filter(({o})=>o?.name);
     const booked = nights.filter(({o})=>o.status==='booked').length;
@@ -85,7 +115,7 @@ const BookingsScreen = (() => {
   }
 
   /* ─── Transport + JR Cheat Sheet ────────────────────────── */
-  function renderTransport() {
+  function renderTransportContent() {
     const frag = document.createDocumentFragment();
     const stops = Data.getTransportReservations();
     frag.appendChild(sectionHead('🚄 Transport', stops.length + ' to track'));
@@ -187,7 +217,7 @@ const BookingsScreen = (() => {
   }
 
   /* ─── Activities ─────────────────────────────────────────── */
-  function renderActivities() {
+  function renderActivitiesContent() {
     const frag = document.createDocumentFragment();
     const stops = Data.getActivityReservations();
     frag.appendChild(sectionHead('🎌 Activities', stops.length + ' to book'));

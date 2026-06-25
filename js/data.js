@@ -220,13 +220,14 @@ const Data = {
     return STOPS[idx];
   },
 
-  async addStop({ dayId, name, activity='', time='', transport='', transportType='walk', notes='' }) {
+  async addStop({ dayId, name, activity='', time='', transport='', transportType='walk', notes='', trainDetail=null, needsBooking=false, category=null }) {
     const existing = STOPS.filter(s => s.dayId === dayId);
     const order = existing.length ? Math.max(...existing.map(s => s.order)) + 1 : 1;
     const stop = {
       id: 's_' + Date.now(), dayId, order, segment: 'kumano',
       name, activity, transport, transportType, time, timeZone: 'JST',
       notes, lat: null, lng: null, hasStamp: false, isSanzan: false,
+      needsBooking, category, trainDetail,
       booking: { status: 'open', ref: '', cost: null, deadline: null },
     };
     STOPS.push(stop);

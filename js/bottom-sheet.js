@@ -187,6 +187,30 @@ const BottomSheet = (() => {
         ${field('Time','a-time','','time')}
         ${textarea('Transport to get here','a-transport','','e.g. On foot · 3.6 km')}
         ${select('Transport type','a-ttype','walk',transTypes)}
+        <div id="a-train-detail-block" class="bs-train-detail-block" style="display:none;margin-top:var(--s2)">
+          <label class="bs-edit-label">Train / service details (for JR cheat sheet)</label>
+          <div style="display:flex;align-items:center;gap:var(--s3);margin-bottom:var(--s3)">
+            <span style="font-size:var(--text-sm);color:var(--text-secondary)">Seat reservation required?</span>
+            <label style="display:flex;align-items:center;gap:4px;cursor:pointer;margin-left:auto">
+              <input type="checkbox" id="a-seatres" style="accent-color:var(--accent);width:16px;height:16px">
+              <span style="font-size:var(--text-sm)">Yes</span>
+            </label>
+          </div>
+          ${field('Origin (boarding station)','a-origin','','text','e.g. Shin-Osaka')}
+          ${field('Destination (alighting)','a-destination','','text','e.g. Kii-Tanabe')}
+          ${field('Arrive time','a-arrive','','text','e.g. 11:52 or TBD')}
+          ${field('Train number','a-trainno','','text','e.g. Kuroshio 5 or TBD')}
+          ${field('Duration','a-duration','','text','e.g. ~2 hrs')}
+        </div>
+        <p class="bs-section-head" style="margin-top:var(--s3)">Reservation</p>
+        <div class="bs-edit-group" style="display:flex;align-items:center;gap:var(--s3)">
+          <label class="bs-edit-label" style="margin-bottom:0">Needs booking?</label>
+          <label style="display:flex;align-items:center;gap:4px;cursor:pointer;margin-left:auto">
+            <input type="checkbox" id="a-needsbook" style="accent-color:var(--accent);width:16px;height:16px">
+            <span style="font-size:var(--text-sm)">Yes</span>
+          </label>
+        </div>
+        ${select('Category','a-category','',[{v:'transport',l:'Transport'},{v:'activity',l:'Activity'}])}
         <div class="bs-actions" style="margin-top:var(--s4)">
           <button class="btn btn-primary bs-full-btn" id="bs-add-btn">Add stop</button>
           <button class="btn btn-ghost bs-full-btn" id="bs-addcancel-btn">Cancel</button>
@@ -220,6 +244,14 @@ const BottomSheet = (() => {
   /* ─── Wire: stop edit ────────────────────────────────────── */
   function wireStopEdit(stop, day) {
     const g = id => body.querySelector('#'+id)?.value?.trim()||'';
+    // Dynamic show/hide of train detail block on type change (fix #5 for edit too)
+    const editTType = body.querySelector('#e-ttype');
+    function updateEditTrainBlock() {
+      const type = editTType?.value || stop.transportType;
+      const block = body.querySelector('.bs-train-detail-block');
+      if (block) block.style.display = ['train','plane','boat'].includes(type) ? 'block' : 'none';
+    }
+    editTType?.addEventListener('change', updateEditTrainBlock);
     body.querySelector('#bs-save-btn')?.addEventListener('click', async () => {
       const hasTrain = ['train','plane','boat'].includes(g('e-ttype')||stop.transportType);
       const patch = {
@@ -266,10 +298,38 @@ const BottomSheet = (() => {
   /* ─── Wire: add stop ─────────────────────────────────────── */
   function wireAdd(dayId) {
     const g = id => body.querySelector('#'+id)?.value?.trim()||'';
+
+    // Show/hide train detail block based on transport type (fix #5)
+    const tTypeSelect = body.querySelector('#a-ttype');
+    const trainBlock  = body.querySelector('#a-train-detail-block');
+    function updateTrainBlock() {
+      const type = tTypeSelect?.value;
+      if (trainBlock) trainBlock.style.display = ['train','plane','boat'].includes(type) ? 'block' : 'none';
+    }
+    tTypeSelect?.addEventListener('change', updateTrainBlock);
+    updateTrainBlock(); // run on open too
+
     body.querySelector('#bs-add-btn')?.addEventListener('click', async () => {
       const name = g('a-name');
       if (!name) { Toast.show('Stop name is required','warning'); return; }
-      await Data.addStop({ dayId:g('a-day')||dayId, name, activity:g('a-activity'), time:g('a-time'), transport:g('a-transport'), transportType:g('a-ttype')||'walk' });
+      const tType = g('a-ttype') || 'walk';
+      const hasTrainDetail = ['train','plane','boat'].includes(tType);
+      const trainDetail = hasTrainDetail ? {
+        seatReservation: body.querySelector('#a-seatres')?.checked || false,
+        origin:      g('a-origin'),
+        destination: g('a-destination'),
+        arriveTime:  g('a-arrive'),
+        trainNumber: g('a-trainno'),
+        duration:    g('a-duration'),
+      } : null;
+      await Data.addStop({
+        dayId: g('a-day')||dayId, name,
+        activity: g('a-activity'), time: g('a-time'),
+        transport: g('a-transport'), transportType: tType,
+        trainDetail,
+        needsBooking: body.querySelector('#a-needsbook')?.checked || false,
+        category: g('a-category') || null,
+      });
       Toast.show(`${name} added`,'success'); close();
       window.ItineraryScreen?.refresh(); window.BookingsScreen?.refresh?.();
     });

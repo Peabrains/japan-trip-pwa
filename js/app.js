@@ -193,14 +193,21 @@ const App = (() => {
       btn.addEventListener('click', () => switchTo(btn.dataset.screen));
     });
 
-    // Sync button — force re-push all data to InstantDB
+    // Sync button — force full push to InstantDB (fix #4 — ensures all local data reaches remote)
     document.getElementById('sync-btn')?.addEventListener('click', async () => {
       if (!Config.INSTANT_APP_ID) {
-        Toast.show('Add INSTANT_APP_ID to js/config.js — visit getadb.com/provision/<uuid>', 'warning');
+        Toast.show('Add INSTANT_APP_ID to js/config.js', 'warning');
         return;
       }
-      await Sync.pushAll();
-      Toast.show('All data pushed to InstantDB', 'success');
+      updateSyncStatus('syncing');
+      try {
+        await Sync.pushAll();
+        updateSyncStatus('synced');
+        Toast.show('All data synced to InstantDB ✓', 'success');
+      } catch(e) {
+        updateSyncStatus('error');
+        Toast.show('Sync failed: ' + e.message, 'warning');
+      }
     });
 
     // Countdown
