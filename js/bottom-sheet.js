@@ -108,7 +108,7 @@ const BottomSheet = (() => {
         <p class="bs-section-head">Details</p>
         ${field('Stop name','e-name',stop.name,'text','e.g. Takijiri-oji')}
         ${textarea('Activity','e-activity',stop.activity,'What happens here?')}
-        ${field('Time','e-time',stop.time,'text','e.g. ~09:00')}
+        ${field('Time','e-time',stop.time?.replace(/[^0-9:]/g,'').padEnd(5,'0'),'time')}
         ${select('Move to day','e-day',stop.dayId,days)}
         <p class="bs-section-head">Transport</p>
         ${textarea('Transport detail','e-transport',stop.transport,'e.g. JR Oito Line · ~40 min · JR Pass ✓')}
@@ -158,7 +158,7 @@ const BottomSheet = (() => {
         ${select('Day','a-day',dayId,days)}
         ${field('Stop name *','a-name','','text','e.g. Kumano Hongu Taisha')}
         ${textarea('Activity','a-activity','','What happens here?')}
-        ${field('Time','a-time','','text','e.g. ~10:00')}
+        ${field('Time','a-time','','time')}
         ${textarea('Transport to get here','a-transport','','e.g. On foot · 3.6 km')}
         ${select('Transport type','a-ttype','walk',transTypes)}
         <div class="bs-actions" style="margin-top:var(--s4)">

@@ -236,7 +236,7 @@
     #sos-print-content { display: none; }
 
     /* ── Overnight accommodation card ───────────────────────── */
-    .overnight-card{margin:0 var(--s3) var(--s2);background:var(--accent-subtle);border:1.5px solid var(--stamp-border);border-radius:var(--r-lg);cursor:pointer;overflow:hidden}
+    .overnight-card{margin:0 var(--s3) var(--s2);background:var(--surface);border:1.5px solid var(--accent);border-radius:var(--r-lg);cursor:pointer;min-height:52px}
     .overnight-card:active{opacity:.8}
     .overnight-inner{display:flex;align-items:center;justify-content:space-between;padding:10px var(--s3);gap:var(--s2);min-height:44px}
     .overnight-inner .icon{color:var(--accent);flex-shrink:0}
@@ -250,6 +250,20 @@
 
     /* ── BS section heads ────────────────────────────────────── */
     .bs-section-head{font-size:var(--text-xs);font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin:var(--s4) 0 var(--s2);padding-bottom:var(--s1);border-bottom:1px solid var(--border-subtle)}
+
+    /* ── Travelers / Settings ───────────────────────────────── */
+    .traveler-chip{display:inline-flex;align-items:center;gap:5px;background:var(--surface-raised);border:1.5px solid var(--border);border-radius:var(--r-pill);padding:4px 10px;font-size:var(--text-sm);color:var(--text-primary);font-weight:500}
+    .traveler-chip--active{background:var(--accent);border-color:var(--accent);color:#fff}
+    .traveler-chip-del{background:none;border:none;color:inherit;cursor:pointer;padding:0;font-size:14px;line-height:1;margin-left:2px;opacity:.7}
+    .traveler-chip-del:hover{opacity:1}
+    .split-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+    .settlement-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r-lg);padding:var(--s3);margin-bottom:var(--s3)}
+    .settlement-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;font-size:var(--text-sm)}
+    .settlement-owed{font-size:var(--text-base);font-weight:500;color:var(--danger-text)}
+    .settlement-settled{font-size:var(--text-base);font-weight:500;color:var(--success-text)}
+    .settings-section{margin-bottom:var(--s5)}
+    .settings-section-title{font-size:var(--text-xs);font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;padding:var(--s3) 0 var(--s2);border-bottom:1px solid var(--border-subtle);margin-bottom:var(--s3)}
+    .traveler-add-row{display:flex;gap:var(--s2);align-items:center;margin-top:var(--s3)}
 
     /* ── Empty ───────────────────────────────────────────────── */
     .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:var(--s8) var(--s4);text-align:center;color:var(--text-muted);gap:var(--s3)}

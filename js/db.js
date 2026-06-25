@@ -110,6 +110,10 @@ const DB = (() => {
     loadQueue:    ()        => getAll('queue'),
     clearQueue:   ()        => clear('queue'),
 
+    /* Travelers */
+    loadTravelers: () => getMeta('travelers').then(v => v || []),
+    saveTravelers: (names) => setMeta('travelers', names),
+
     /* Overnight */
     loadOvernight: () => getMeta('overnight').then(v => v || null),
     saveOvernight: (data) => setMeta('overnight', data),

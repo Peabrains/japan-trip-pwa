@@ -97,17 +97,44 @@ const Sync = (() => {
     }
 
     if (data.expenses?.length) {
-      Data.setExpenses(data.expenses);
+      const localExp = Data.getExpenses();
+      if (data.expenses.length >= localExp.length) {
+        Data.setExpenses(data.expenses);
+      } else {
+        // Merge: remote has fewer — add/update remote items, keep local ones
+        const merged = [...localExp];
+        data.expenses.forEach(re => {
+          const idx = merged.findIndex(e => e.id === re.id);
+          if (idx >= 0) merged[idx] = re; else merged.push(re);
+        });
+        Data.setExpenses(merged);
+      }
       changed = true;
     }
 
     if (data.packing?.length) {
-      Data.setPackingItems(data.packing);
+      const localPack = Data.getPackingItems();
+      if (data.packing.length >= localPack.length) {
+        Data.setPackingItems(data.packing);
+      } else {
+        const merged = [...localPack];
+        data.packing.forEach(rp => {
+          const idx = merged.findIndex(p => p.id === rp.id);
+          if (idx >= 0) merged[idx] = rp; else merged.push(rp);
+        });
+        Data.setPackingItems(merged);
+      }
       changed = true;
     }
 
     if (data.overnight?.length) {
       data.overnight.forEach(o => Data.setOvernight(o.dayId, o));
+      changed = true;
+    }
+
+    if (data.travelers?.length) {
+      const names = data.travelers.map(t => t.name || t).filter(Boolean);
+      Data.setTravelers(names);
       changed = true;
     }
 
@@ -128,9 +155,10 @@ const Sync = (() => {
     const stamps   = Data.getStampStops()
       .filter(s => Data.isStampCollected(s.id))
       .map(s => db.tx.stamps[s.id].update({ stopId: s.id, collected: true }));
+    const travelers = Data.getTravelers().map((name,i) => db.tx.travelers[String(i)].update({name, order:i}));
     const overnight = Object.entries(Data.getAllOvernight())
       .map(([dayId, o]) => db.tx.overnight[dayId].update({ dayId, ...o }));
-    const all = [...stops, ...expenses, ...packing, ...stamps, ...overnight];
+    const all = [...stops, ...expenses, ...packing, ...stamps, ...overnight, ...travelers];
     if (all.length) await db.transact(all);
   }
 
@@ -146,7 +174,7 @@ const Sync = (() => {
       App.updateSyncStatus('syncing');
 
       _unsub = db.subscribeQuery(
-        { stops:{}, stamps:{}, expenses:{}, packing:{}, overnight:{} },
+        { stops:{}, stamps:{}, expenses:{}, packing:{}, overnight:{}, travelers:{} },
         ({ data, error }) => {
           if (error) { console.error('[Sync]', error); App.updateSyncStatus('error'); return; }
           if (!data) return;
@@ -217,12 +245,20 @@ const Sync = (() => {
     catch(e) { console.warn('[Sync] pushOvernight:', e); }
   }
 
+  async function pushTravelers(names) {
+    if (!db) return;
+    try {
+      const txns = names.map((name,i) => db.tx.travelers[String(i)].update({name, order:i}));
+      if (txns.length) await db.transact(txns);
+    } catch(e) { console.warn('[Sync] pushTravelers:', e); }
+  }
+
   function destroy() {
     if (_unsub) { _unsub(); _unsub = null; }
     db = null;
   }
 
-  return { init, pushAll, pushStop, removeStop, pushExpense, removeExpense, pushStamp, pushPacking, removePacking, pushOvernight, destroy };
+  return { init, pushAll, pushStop, removeStop, pushExpense, removeExpense, pushStamp, pushPacking, removePacking, pushOvernight, pushTravelers, destroy };
 })();
 
 window.Sync = Sync;

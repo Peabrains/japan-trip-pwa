@@ -118,6 +118,8 @@ let EXPENSES = [];
 let PACKING  = [...SEED_PACKING];
 let OVERNIGHT = {}; // dayId → overnight object (mirrors DAYS[].overnight)
 
+let TRAVELERS = []; // set by user in Settings
+
 // Build overnight map from DAYS
 DAYS.forEach(d => { if (d.overnight) OVERNIGHT[d.id] = { ...d.overnight }; });
 
@@ -140,6 +142,9 @@ const Data = {
       if (dbExp?.length) EXPENSES = dbExp;
       const dbPack = await DB.loadPacking();
       if (dbPack?.length) PACKING = dbPack; else await DB.savePacking(PACKING);
+      // Load travelers
+      const dbTravelers = await DB.loadTravelers().catch(() => []);
+      if (dbTravelers?.length) TRAVELERS = dbTravelers;
       // Load overnight overrides from DB if any
       const dbOvernight = await DB.loadOvernight().catch(() => null);
       if (dbOvernight) Object.assign(OVERNIGHT, dbOvernight);
@@ -156,10 +161,45 @@ const Data = {
   /* ── Getters ─────────────────────────────────────────── */
   getDays:        () => DAYS,
   getStops:       () => STOPS,
-  getStopsByDay:  (id) => STOPS.filter(s => s.dayId === id).sort((a,b) => a.order - b.order),
+  getStopsByDay(id) {
+    function parseTime(t) {
+      if (!t) return 9999;
+      const clean = String(t).replace(/[~\s]/g,'');
+      if (!clean || clean.toLowerCase()==='free' || clean.toLowerCase()==='morning') return clean.toLowerCase()==='morning'?480:720;
+      const m = clean.match(/^(\d{1,2}):(\d{2})/);
+      return m ? parseInt(m[1])*60+parseInt(m[2]) : 9999;
+    }
+    return STOPS.filter(s => s.dayId === id).sort((a,b) => parseTime(a.time) - parseTime(b.time));
+  },
   getStop:        (id) => STOPS.find(s => s.id === id),
   getExpenses:    () => EXPENSES,
   getPackingItems:() => PACKING,
+  /* ── Travelers ──────────────────────────────────────────── */
+  getTravelers:    () => TRAVELERS,
+  setTravelers(names) { TRAVELERS = names; },
+  async updateTravelers(names) {
+    TRAVELERS = names;
+    await DB.saveTravelers(names);
+    Sync?.pushTravelers?.(names);
+  },
+
+  /* ── Settlement ──────────────────────────────────────────── */
+  calcSettlement() {
+    const travelers = TRAVELERS;
+    if (!travelers.length) return {};
+    const balances = {};
+    travelers.forEach(t => balances[t] = 0);
+    EXPENSES.forEach(exp => {
+      if (!exp.paidBy || !exp.splitBetween?.length) return;
+      const validSplit = exp.splitBetween.filter(n => balances[n] !== undefined);
+      if (!validSplit.length) return;
+      const share = exp.amountJPY / validSplit.length;
+      if (balances[exp.paidBy] !== undefined) balances[exp.paidBy] += exp.amountJPY;
+      validSplit.forEach(name => { balances[name] -= share; });
+    });
+    return balances;
+  },
+
   getSOS:         () => SOS_DATA,
   getOvernight:   (dayId) => OVERNIGHT[dayId] || null,
   getAllOvernight: () => OVERNIGHT,
