@@ -127,14 +127,19 @@ const Sync = (() => {
       changed = true;
     }
 
-    if (data.overnight?.length) {
-      data.overnight.forEach(o => Data.setOvernight(o.dayId, o));
-      changed = true;
-    }
-
-    if (data.travelers?.length) {
-      const names = data.travelers.map(t => t.name || t).filter(Boolean);
-      Data.setTravelers(names);
+    if (data.settings?.length) {
+      const s = data.settings[0];
+      if (s) {
+        if (s.travelers) {
+          try { Data.setTravelers(JSON.parse(s.travelers)); } catch(_) {}
+        }
+        if (s.overnight) {
+          try {
+            const o = JSON.parse(s.overnight);
+            Object.entries(o).forEach(([dayId, val]) => Data.setOvernight(dayId, val));
+          } catch(_) {}
+        }
+      }
       changed = true;
     }
 
@@ -156,9 +161,11 @@ const Sync = (() => {
       .filter(s => Data.isStampCollected(s.id))
       .map(s => db.tx.stamps[s.id].update({ stopId: s.id, collected: true }));
     const travelers = Data.getTravelers().map((name,i) => db.tx.travelers[String(i)].update({name, order:i}));
-    const overnight = Object.entries(Data.getAllOvernight())
-      .map(([dayId, o]) => db.tx.overnight[dayId].update({ dayId, ...o }));
-    const all = [...stops, ...expenses, ...packing, ...stamps, ...overnight, ...travelers];
+    const settingsTxn = db.tx.settings['trip'].update({
+      travelers: JSON.stringify(Data.getTravelers()),
+      overnight: JSON.stringify(Data.getAllOvernight()),
+    });
+    const all = [...stops, ...expenses, ...packing, ...stamps, settingsTxn];
     if (all.length) await db.transact(all);
   }
 
@@ -174,7 +181,7 @@ const Sync = (() => {
       App.updateSyncStatus('syncing');
 
       _unsub = db.subscribeQuery(
-        { stops:{}, stamps:{}, expenses:{}, packing:{}, overnight:{}, travelers:{} },
+        { stops:{}, stamps:{}, expenses:{}, packing:{}, settings:{} },
         ({ data, error }) => {
           if (error) { console.error('[Sync]', error); App.updateSyncStatus('error'); return; }
           if (!data) return;
@@ -239,18 +246,18 @@ const Sync = (() => {
     try { await db.transact(db.tx.packing[id].delete()); }
     catch(e) { console.warn('[Sync] removePacking:', e); }
   }
-  async function pushOvernight(dayId, o) {
+  async function pushSettings() {
     if (!db) return;
-    try { await db.transact(db.tx.overnight[dayId].update({ dayId, ...o })); }
-    catch(e) { console.warn('[Sync] pushOvernight:', e); }
+    try {
+      await db.transact(db.tx.settings['trip'].update({
+        travelers: JSON.stringify(Data.getTravelers()),
+        overnight: JSON.stringify(Data.getAllOvernight()),
+      }));
+    } catch(e) { console.warn('[Sync] pushSettings:', e); }
   }
 
   async function pushTravelers(names) {
-    if (!db) return;
-    try {
-      const txns = names.map((name,i) => db.tx.travelers[String(i)].update({name, order:i}));
-      if (txns.length) await db.transact(txns);
-    } catch(e) { console.warn('[Sync] pushTravelers:', e); }
+    await pushSettings();
   }
 
   function destroy() {
@@ -258,7 +265,7 @@ const Sync = (() => {
     db = null;
   }
 
-  return { init, pushAll, pushStop, removeStop, pushExpense, removeExpense, pushStamp, pushPacking, removePacking, pushOvernight, pushTravelers, destroy };
+  return { init, pushAll, pushStop, removeStop, pushExpense, removeExpense, pushStamp, pushPacking, removePacking, pushSettings, pushTravelers, destroy };
 })();
 
 window.Sync = Sync;

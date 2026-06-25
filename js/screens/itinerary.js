@@ -106,7 +106,11 @@ const ItineraryScreen = (() => {
         ${stop.transportType === 'train' && stop.trainDetail?.platform
           ? `<p class="tl-platform">Platform: ${stop.trainDetail.platform}</p>` : ''}
         ${stop.notes ? `<p class="tl-note">${stop.notes}</p>` : ''}
-        <div class="tl-footer">${badge(stop.booking.status)}</div>
+        <div class="tl-footer">
+          ${badge(stop.booking.status)}
+          ${stop.category==='transport'?'<span class="cat-chip cat-chip--transport">Transport</span>':stop.category==='activity'?'<span class="cat-chip cat-chip--activity">Activity</span>':''}
+          ${stop.trainDetail?.seatReservation?'<span class="cat-chip cat-chip--jr">Seat res.</span>':''}
+        </div>
       </div>`;
 
     row.addEventListener('click', () => BottomSheet.openStop(stop, day));

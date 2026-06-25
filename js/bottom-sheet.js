@@ -114,6 +114,32 @@ const BottomSheet = (() => {
         ${textarea('Transport detail','e-transport',stop.transport,'e.g. JR Oito Line · ~40 min · JR Pass ✓')}
         ${select('Transport type','e-ttype',stop.transportType,transTypes)}
         ${field('Platform','e-platform',stop.trainDetail?.platform||'','text','e.g. Platform 2')}
+        ${['train','plane','boat'].includes(stop.transportType||'')?`
+          <div class="bs-train-detail-block">
+            <label class="bs-edit-label">Train / service details (for JR cheat sheet)</label>
+            <div style="display:flex;align-items:center;gap:var(--s3);margin-bottom:var(--s3)">
+              <span style="font-size:var(--text-sm);color:var(--text-secondary)">Seat reservation required?</span>
+              <label style="display:flex;align-items:center;gap:4px;cursor:pointer;margin-left:auto">
+                <input type="checkbox" id="e-seatres" ${stop.trainDetail?.seatReservation?'checked':''} style="accent-color:var(--accent);width:16px;height:16px">
+                <span style="font-size:var(--text-sm)">Yes</span>
+              </label>
+            </div>
+            ${field('Origin','e-origin',stop.trainDetail?.origin||'','text','e.g. Shin-Osaka')}
+            ${field('Destination','e-destination',stop.trainDetail?.destination||'','text','e.g. Kii-Tanabe')}
+            ${field('Arrive time','e-arrive',stop.trainDetail?.arriveTime||'','text','e.g. 11:52 or TBD')}
+            ${field('Train number','e-trainno',stop.trainDetail?.trainNumber||'','text','e.g. Kuroshio 5 or TBD')}
+            ${field('Duration','e-duration',stop.trainDetail?.duration||'','text','e.g. ~2 hrs')}
+          </div>
+        `:''}
+        <p class="bs-section-head">Reservation</p>
+        <div class="bs-edit-group" style="display:flex;align-items:center;gap:var(--s3)">
+          <label class="bs-edit-label" style="margin-bottom:0">Needs booking?</label>
+          <label style="display:flex;align-items:center;gap:4px;cursor:pointer;margin-left:auto">
+            <input type="checkbox" id="e-needsbook" ${stop.needsBooking?'checked':''} style="accent-color:var(--accent);width:16px;height:16px">
+            <span style="font-size:var(--text-sm)">Yes</span>
+          </label>
+        </div>
+        ${select('Category','e-category',stop.category||'',[{v:'transport',l:'Transport'},{v:'activity',l:'Activity'}])}
         <p class="bs-section-head">Booking</p>
         ${select('Status','e-status',stop.booking.status,statusOpts)}
         ${field('Reference','e-ref',stop.booking.ref||'','text','e.g. HTL-20270412')}
@@ -195,6 +221,7 @@ const BottomSheet = (() => {
   function wireStopEdit(stop, day) {
     const g = id => body.querySelector('#'+id)?.value?.trim()||'';
     body.querySelector('#bs-save-btn')?.addEventListener('click', async () => {
+      const hasTrain = ['train','plane','boat'].includes(g('e-ttype')||stop.transportType);
       const patch = {
         name:          g('e-name')||stop.name,
         activity:      g('e-activity'),
@@ -203,7 +230,18 @@ const BottomSheet = (() => {
         transport:     g('e-transport'),
         transportType: g('e-ttype')||stop.transportType,
         notes:         g('e-notes'),
-        trainDetail:   {...stop.trainDetail, platform:g('e-platform')},
+        needsBooking:  body.querySelector('#e-needsbook')?.checked || false,
+        category:      g('e-category') || null,
+        trainDetail: hasTrain ? {
+          ...stop.trainDetail,
+          platform:       g('e-platform'),
+          seatReservation: body.querySelector('#e-seatres')?.checked || false,
+          origin:         g('e-origin'),
+          destination:    g('e-destination'),
+          arriveTime:     g('e-arrive'),
+          trainNumber:    g('e-trainno'),
+          duration:       g('e-duration'),
+        } : stop.trainDetail,
         booking: { ...stop.booking, status:g('e-status')||stop.booking.status, ref:g('e-ref'), cost:parseInt(g('e-cost'))||null, deadline:g('e-deadline')||null },
       };
       await Data.updateStop(stop.id, patch);
