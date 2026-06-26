@@ -47,8 +47,9 @@ const Sync = (() => {
       packing:  JSON.stringify(Data.getPackingItems()),
       stamps:   JSON.stringify([...(window._STAMPS_COLLECTED || [])]),
       settings: JSON.stringify({
-        travelers: Data.getTravelers(),
-        overnight: Data.getAllOvernight(),
+        travelers:   Data.getTravelers(),
+        overnight:   Data.getAllOvernight(),
+        customLinks: Data.getCustomLinks?.() || [],
       }),
       updatedAt: Date.now(),
     };
@@ -164,6 +165,7 @@ const Sync = (() => {
         if (s.overnight && typeof s.overnight === 'object') {
           Object.entries(s.overnight).forEach(([dayId, o]) => Data.setOvernight(dayId, o));
         }
+        if (Array.isArray(s.customLinks)) Data.setCustomLinks?.(s.customLinks);
         changed = true;
       } catch(e) { console.warn('[Sync] parse settings:', e); }
     }

@@ -134,6 +134,8 @@ const DB = (() => {
     getLastSync:  ()    => getMeta('lastSync'),
     setLastSync:  (ts)  => setMeta('lastSync', ts),
     setMeta:       (key, val) => setMeta(key, val),
+    loadCustomLinks: () => getMeta('customLinks').then(v => v || []),
+    saveCustomLinks: (links) => setMeta('customLinks', links),
   };
 })();
 

@@ -23,12 +23,12 @@ const DAYS = [
 
 /* ── Overnight defaults (keyed by dayId) ────────────────── */
 const OVERNIGHT_DEFAULTS = {
-  d1:  {name:'本州最南端の小さなペンションBranchee',    status:'pending', ref:'',             cost:null, deadline:null},
-  d2:  {name:'the cue - hoso back yard house -',        status:'pending', ref:'',             cost:null, deadline:null},
-  d3:  {name:'Kiri-no-Sato Takahara Lodge',             status:'pending', ref:'',             cost:null, deadline:'2027-01-15'},
-  d4:  {name:'古道の宿 ひよどり (Guest House Hiyodori)',  status:'pending', ref:'',             cost:null, deadline:'2027-01-15'},
-  d5:  {name:'Kawayu-Onsen Fujiya',                     status:'pending', ref:'',             cost:null, deadline:'2027-01-15'},
-  d6:  {name:'Kawayu-Onsen Fujiya (2nd night)',         status:'pending', ref:'',             cost:null, deadline:null},
+  d1:  {name:'Kushimoto (Pending)',                     status:'open',    ref:'',             cost:null, deadline:null},
+  d2:  {name:'the cue - hoso back yard house -',        status:'booked',  ref:'#205159',      cost:null, deadline:null},
+  d3:  {name:'Kiri-no-Sato Takahara Lodge',             status:'booked',  ref:'#205689',      cost:null, deadline:null},
+  d4:  {name:'古道の宿 ひよどり (Guest House Hiyodori)',  status:'booked',  ref:'#205751',      cost:null, deadline:null},
+  d5:  {name:'Kawayu-Onsen Fujiya',                     status:'booked',  ref:'#205159',      cost:null, deadline:null},
+  d6:  {name:'Kawayu-Onsen Fujiya (2nd night)',         status:'booked',  ref:'#205159',      cost:null, deadline:null},
   d7:  {name:'Kii-Katsuura (Pending)',                  status:'open',    ref:'',             cost:null, deadline:'2027-02-01'},
   d8:  {name:'Nagano (Pending)',                        status:'open',    ref:'',             cost:null, deadline:null},
   d9:  {name:'Nagano (Pending)',                        status:'open',    ref:'',             cost:null, deadline:null},
@@ -185,7 +185,7 @@ T('sk20','d7',1,'kumano','Kumano-gawa Riverboat',
   'Board at Hongu riverside. Depart 14:30. Arrive ~16:30.',
   'boat','14:30','JST', 33.8406,135.7735,
   false,'',false, true,'activity',null,
-  {status:'urgent',ref:'',cost:null,deadline:'2027-02-01'}),
+  {status:'booked',ref:'#205769',cost:null,deadline:null}),
 
 T('sk21','d7',2,'kumano','Shingu → Kii-Katsuura',
   'Short JR hop to Katsuura for overnight.',
@@ -420,6 +420,7 @@ let PACKING  = [...SEED_PACKING];
 let OVERNIGHT = {};
 let TRAVELERS = [];
 let TRIP_NAME = 'Japan Trip';
+let CUSTOM_LINKS = [];
 
 // Build overnight from OVERNIGHT_DEFAULTS
 Object.entries(OVERNIGHT_DEFAULTS).forEach(([k,v]) => { OVERNIGHT[k] = { ...v }; });
@@ -462,6 +463,8 @@ const Data = {
       if (dbTravelers?.length) TRAVELERS = dbTravelers;
       const storedName = await DB.getMeta('tripName').catch(() => null);
       if (storedName) TRIP_NAME = storedName;
+      const storedLinks = await DB.loadCustomLinks().catch(() => []);
+      if (storedLinks?.length) CUSTOM_LINKS = storedLinks;
     } catch(e) { console.warn('[Data.init]', e); }
   },
 
@@ -498,6 +501,22 @@ const Data = {
     // Update header immediately
     const el = document.getElementById('header-trip-name');
     if (el) el.textContent = name;
+    Sync?.pushSettings?.();
+  },
+
+  /* ── Custom links ───────────────────────────────────────── */
+  getCustomLinks:  () => CUSTOM_LINKS,
+  setCustomLinks:  (links) => { CUSTOM_LINKS = links; },
+  async addCustomLink({ title, url }) {
+    const link = { id: 'cl_' + Date.now(), title, url, addedAt: Date.now() };
+    CUSTOM_LINKS.push(link);
+    await DB.saveCustomLinks(CUSTOM_LINKS);
+    Sync?.pushSettings?.();
+    return link;
+  },
+  async deleteCustomLink(id) {
+    CUSTOM_LINKS = CUSTOM_LINKS.filter(l => l.id !== id);
+    await DB.saveCustomLinks(CUSTOM_LINKS);
     Sync?.pushSettings?.();
   },
 
