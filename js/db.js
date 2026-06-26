@@ -112,7 +112,11 @@ const DB = (() => {
 
     /* Stops — delete */
     deleteStop: (id) => del('stops', id),
-    clearStops: () => new Promise((res,rej) => { const t=db.transaction('stops','readwrite'); t.objectStore('stops').clear().onsuccess=res; t.onerror=rej; }),
+    clearStops:    () => new Promise((res,rej) => { const t=db.transaction('stops','readwrite');    const r=t.objectStore('stops').clear();    r.onsuccess=res; r.onerror=rej; }),
+    clearExpenses: () => new Promise((res,rej) => { const t=db.transaction('expenses','readwrite'); const r=t.objectStore('expenses').clear(); r.onsuccess=res; r.onerror=rej; }),
+    clearPacking:  () => new Promise((res,rej) => { const t=db.transaction('packing','readwrite');  const r=t.objectStore('packing').clear();  r.onsuccess=res; r.onerror=rej; }),
+    clearStamps:   () => new Promise((res,rej) => { const t=db.transaction('stamps','readwrite');   const r=t.objectStore('stamps').clear();   r.onsuccess=res; r.onerror=rej; }),
+    clearMeta:     () => new Promise((res,rej) => { const t=db.transaction('meta','readwrite');     const r=t.objectStore('meta').clear();     r.onsuccess=res; r.onerror=rej; }),
 
     /* Packing — save single item + delete */
     savePackingItem: (item) => put('packing', item),
@@ -129,6 +133,7 @@ const DB = (() => {
     /* Meta */
     getLastSync:  ()    => getMeta('lastSync'),
     setLastSync:  (ts)  => setMeta('lastSync', ts),
+    setMeta:       (key, val) => setMeta(key, val),
   };
 })();
 

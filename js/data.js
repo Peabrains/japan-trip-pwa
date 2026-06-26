@@ -42,7 +42,7 @@ const OVERNIGHT_DEFAULTS = {
 const T = (s,d,o,seg,name,act,transport,tt,time,tz,lat,lng,stamp,kanji,sanzan,needs,cat,td,bk) => ({
   id:s, dayId:d, order:o, segment:seg, name, activity:act, transport, transportType:tt,
   time, timeZone:tz||'JST', lat, lng,
-  hasStamp:!!stamp, stampKanji:kanji||'', isSanzan:!!sanzan,
+  hasStamp:!!stamp, stampKanji:kanji||'', stampRomaji:'', isSanzan:!!sanzan, sanzanNum:null,
   needsBooking:!!needs, category:cat||null, trainDetail:td||null,
   notes:'', booking:bk||{status:'open',ref:'',cost:null,deadline:null},
 });
@@ -328,6 +328,25 @@ T('sk40','d14',1,'osaka','KIX — Morning flight home',
   {status:'open',ref:'',cost:null,deadline:null}),
 ];
 
+/* ── Stamp metadata (romaji names + sanzan order) ───────── */
+const STAMP_META = {
+  sk04: {romaji:'Hayatama Taisha',  sanzanNum:2},
+  sk10: {romaji:'Takijiri-oji',     sanzanNum:null},
+  sk11: {romaji:'Takahara',         sanzanNum:null},
+  sk13: {romaji:'Chikatsuyu-oji',   sanzanNum:null},
+  sk14: {romaji:'Tsugizakura-oji',  sanzanNum:null},
+  sk15: {romaji:'Hosshinmon-oji',   sanzanNum:null},
+  sk16: {romaji:'Hongu Taisha',     sanzanNum:1},
+  sk17: {romaji:'Yunomine Onsen',   sanzanNum:null},
+  sk23: {romaji:'Nachi Taisha',     sanzanNum:3},
+  sk28: {romaji:'Togakushi Okusha', sanzanNum:null},
+  sk32: {romaji:'Kurobe Dam',       sanzanNum:null},
+};
+SEED_STOPS.forEach(s => {
+  const m = STAMP_META[s.id];
+  if (m) { s.stampRomaji = m.romaji; if (m.sanzanNum) s.sanzanNum = m.sanzanNum; }
+});
+
 /* ── Packing list ────────────────────────────────────────── */
 const SEED_PACKING = [
   {id:'pk01',cat:'Documents',   item:'Passport (valid >6 months)',         checked:false,essential:true},
@@ -400,6 +419,7 @@ let EXPENSES = [];
 let PACKING  = [...SEED_PACKING];
 let OVERNIGHT = {};
 let TRAVELERS = [];
+let TRIP_NAME = 'Japan Trip';
 
 // Build overnight from OVERNIGHT_DEFAULTS
 Object.entries(OVERNIGHT_DEFAULTS).forEach(([k,v]) => { OVERNIGHT[k] = { ...v }; });
@@ -440,6 +460,8 @@ const Data = {
       if (dbPack?.length) PACKING = dbPack; else await DB.savePacking(PACKING);
       const dbTravelers = await DB.loadTravelers().catch(() => []);
       if (dbTravelers?.length) TRAVELERS = dbTravelers;
+      const storedName = await DB.getMeta('tripName').catch(() => null);
+      if (storedName) TRIP_NAME = storedName;
     } catch(e) { console.warn('[Data.init]', e); }
   },
 
@@ -467,6 +489,40 @@ const Data = {
   getStop:        (id) => STOPS.find(s => s.id === id),
   getExpenses:    () => EXPENSES,
   getPackingItems:() => PACKING,
+
+  /* ── Trip name ──────────────────────────────────────────── */
+  getTripName: () => TRIP_NAME,
+  async setTripName(name) {
+    TRIP_NAME = name;
+    await DB.setMeta('tripName', name);
+    // Update header immediately
+    const el = document.getElementById('header-trip-name');
+    if (el) el.textContent = name;
+    Sync?.pushSettings?.();
+  },
+
+  /* ── Nuclear reset ───────────────────────────────────────── */
+  async resetToSeed() {
+    // Wipe IndexedDB completely
+    await Promise.all([
+      DB.clearStops(), DB.clearExpenses(), DB.clearPacking(),
+      DB.clearStamps(), DB.clearMeta(),
+    ]).catch(()=>{});
+    // Re-seed state from SEED_STOPS
+    STOPS = JSON.parse(JSON.stringify(SEED_STOPS));
+    STOPS.forEach(s => {
+      const m = STAMP_META[s.id];
+      if (m) { s.stampRomaji = m.romaji; if (m.sanzanNum) s.sanzanNum = m.sanzanNum; }
+    });
+    EXPENSES = []; PACKING = JSON.parse(JSON.stringify(SEED_PACKING));
+    OVERNIGHT = {};
+    Object.entries(OVERNIGHT_DEFAULTS).forEach(([k,v]) => { OVERNIGHT[k] = {...v}; });
+    STAMPS_COLLECTED.clear(); TRAVELERS = [];
+    // Save fresh state to IndexedDB
+    await DB.saveStops(STOPS);
+    await DB.savePacking(PACKING);
+    await DB.setMeta('dataVersion', Config.DATA_VERSION || 2);
+  },
 
   /* ── Travelers ───────────────────────────────────────── */
   getTravelers: () => TRAVELERS,

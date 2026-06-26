@@ -113,7 +113,7 @@
     .tl-content{flex:1;padding:10px 0 20px var(--s3);min-width:0}
     .tl-name-row{display:flex;align-items:center;gap:6px}
     .tl-name{font-size:var(--text-base);font-weight:500;color:var(--text-primary)}
-    .tl-stamp-dot{font-size:10px;font-weight:500;width:18px;height:18px;border-radius:50%;border:1.5px solid var(--accent);color:var(--accent);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1}
+    .tl-stamp-dot{font-size:9px;font-weight:600;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--accent);color:var(--accent);background:transparent;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;vertical-align:middle;margin-left:4px}
     .tl-stamp-dot--on{background:var(--accent);color:#fff}
     .tl-activity{font-size:var(--text-sm);color:var(--text-secondary);margin-top:3px}
     /* Transport row — visible, with icon (fix #2) */
@@ -291,7 +291,7 @@
     <div class="header-inner">
       <div>
         <span class="header-sub">Apr 10–26 · 2 pax · Kumano Kodo</span>
-        <p class="header-title">Japan Trip 2026</p>
+        <p class="header-title" id="header-trip-name">Japan Trip</p>
         <span class="header-countdown" id="countdown"></span>
       </div>
       <div class="header-right">

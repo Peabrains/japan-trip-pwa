@@ -60,7 +60,7 @@ const App = (() => {
         dot.className = `stamp-dot ${collected ? 'stamp-dot--collected' : ''} ${stop.isSanzan ? 'stamp-dot--sanzan' : ''}`;
         dot.innerHTML = `
           <span class="stamp-kanji">${stop.stampKanji}</span>
-          <span class="stamp-romaji">${stop.stampRomaji}</span>
+          <span class="stamp-romaji">${stop.stampRomaji||''}</span>
           ${stop.isSanzan ? `<span class="stamp-tag">S${stop.sanzanNum}</span>` : ''}`;
         dot.addEventListener('click', async () => {
           const now = await Data.toggleStamp(stop.id);
@@ -68,7 +68,7 @@ const App = (() => {
           if (prog.sanzanComplete && now && stop.isSanzan && stop.sanzanNum === 3) {
             Toast.show('三山達成 — Kumano Sanzan complete!', 'success');
           } else {
-            Toast.show(now ? `${stop.stampRomaji} stamp collected` : 'Stamp uncollected', now ? 'success' : 'info');
+            Toast.show(now ? `${stop.stampRomaji||stop.name} stamp collected` : 'Stamp uncollected', now ? 'success' : 'info');
           }
           renderStampBanner();
         });
@@ -159,6 +159,9 @@ const App = (() => {
 
     watchConnectivity();
     updateUrgentBadge();
+    // Set trip name from stored value
+    const tnEl = document.getElementById('header-trip-name');
+    if (tnEl && Data.getTripName) tnEl.textContent = Data.getTripName();
     updateSyncStatus(Config.INSTANT_APP_ID && navigator.onLine ? 'syncing' : 'offline');
 
     // Render stamp banner once into its persistent container

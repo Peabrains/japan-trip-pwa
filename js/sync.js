@@ -41,6 +41,7 @@ const Sync = (() => {
   function buildPayload() {
     return {
       dataVersion: String(Config.DATA_VERSION || 1),
+      tripName:    Data.getTripName?.() || '',
       stops:    JSON.stringify(Data.getStops()),
       expenses: JSON.stringify(Data.getExpenses()),
       packing:  JSON.stringify(Data.getPackingItems()),
@@ -108,8 +109,17 @@ const Sync = (() => {
       try {
         const remote = JSON.parse(record.stops);
         if (remote.length) {
-          Data.setStops(mergeStops(remote));
-          changed = true;
+          // Extra safety: if local has new sk* IDs but remote only has old s* IDs,
+          // this is a version mismatch — push new data instead of merging old in
+          const localHasNew  = Data.getStops().some(s => s.id.startsWith('sk'));
+          const remoteHasNew = remote.some(s => s.id.startsWith('sk'));
+          if (localHasNew && !remoteHasNew) {
+            console.log('[Sync] Remote has old stop IDs, pushing new data up.');
+            setTimeout(() => pushAll().catch(console.warn), 500);
+          } else {
+            Data.setStops(mergeStops(remote));
+            changed = true;
+          }
         }
       } catch(e) { console.warn('[Sync] parse stops:', e); }
     }
@@ -139,6 +149,11 @@ const Sync = (() => {
         ids.forEach(id => Data.setStampCollected(id, true));
         changed = true;
       } catch(e) { console.warn('[Sync] parse stamps:', e); }
+    }
+
+    /* Trip name */
+    if (record.tripName) {
+      Data.setTripName?.(record.tripName).catch(()=>{});
     }
 
     /* Settings (travelers + overnight) */

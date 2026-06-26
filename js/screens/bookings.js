@@ -480,12 +480,23 @@ const BookingsScreen = (() => {
       <div class="bs-edit-group"><label class="bs-edit-label">Budget (RM)</label><input id="cfg-budget" class="bs-input" type="number" value="${Config.BUDGET_MYR}"></div>
       <div class="bs-edit-group"><label class="bs-edit-label">Exchange rate (1 MYR = ? JPY)</label><input id="cfg-rate" class="bs-input" type="number" value="${Config.EXCHANGE_RATE_JPY}"></div>
       <button class="btn btn-primary" id="cfg-save-btn" style="width:100%;margin-top:var(--s2)">Save budget settings</button>`;
+    const tripSection = document.createElement('div');
+    tripSection.className = 'settings-section';
+    tripSection.innerHTML = `
+      <p class="settings-section-title">Trip</p>
+      <div class="bs-edit-group">
+        <label class="bs-edit-label">Trip name (shown in header)</label>
+        <input id="trip-name-input" class="bs-input" type="text" value="${Data.getTripName?.() || 'Japan Trip'}" placeholder="e.g. Japan Trip 2027">
+      </div>
+      <button class="btn btn-primary" id="trip-name-save-btn" style="width:100%;margin-top:var(--s2)">Save trip name</button>`;
+    frag.appendChild(tripSection);
+
     const resetSection = document.createElement('div');
     resetSection.className = 'settings-section';
     resetSection.innerHTML = `
       <p class="settings-section-title">Data</p>
-      <p style="font-size:var(--text-xs);color:var(--text-muted);margin-bottom:var(--s3)">Reset clears all local data and re-seeds from the app defaults. Use when upgrading to a new itinerary version.</p>
-      <button class="btn btn-ghost" id="reset-data-btn" style="width:100%;color:var(--danger-text);border-color:var(--danger-text)">Reset & reseed from defaults</button>`;
+      <p style="font-size:var(--text-xs);color:var(--text-muted);margin-bottom:var(--s3)">Nuclear reset wipes ALL local data and InstantDB, then reseeds fresh from the built-in itinerary. Use when sync is broken or data is corrupt.</p>
+      <button class="btn btn-ghost" id="reset-data-btn" style="width:100%;color:var(--danger-text);border-color:var(--danger-text);margin-bottom:var(--s2)">🗑 Nuclear reset — fresh start</button>`;
     frag.appendChild(resetSection);
 
     frag.appendChild(budgetSection);
@@ -503,12 +514,24 @@ const BookingsScreen = (() => {
     tAddBtn?.addEventListener('click', addTraveler);
     tInput?.addEventListener('keydown', e => { if (e.key==='Enter') addTraveler(); });
 
+    root.querySelector('#trip-name-save-btn')?.addEventListener('click', async () => {
+      const name = root.querySelector('#trip-name-input')?.value?.trim();
+      if (!name) return;
+      await Data.setTripName(name);
+      Toast.show('Trip name updated','success');
+    });
+
     root.querySelector('#reset-data-btn')?.addEventListener('click', async () => {
-      if (!confirm('Reset all local data and reseed? This cannot be undone.')) return;
-      await DB.clearStops().catch(()=>{});
-      await DB.setMeta('dataVersion', 0);
-      Toast.show('Reloading…','info');
-      setTimeout(() => location.reload(), 800);
+      if (!confirm('NUCLEAR RESET: wipe all data and reseed fresh from built-in itinerary?\n\nThis cannot be undone.')) return;
+      Toast.show('Resetting…','info');
+      try {
+        await Data.resetToSeed();
+        await Sync.pushAll();
+        Toast.show('Done — reloading','success');
+        setTimeout(() => location.reload(), 1000);
+      } catch(e) {
+        Toast.show('Reset failed: ' + e.message,'warning');
+      }
     });
     budgetSection.querySelector('#cfg-save-btn')?.addEventListener('click', () => {
       Config.BUDGET_MYR        = parseInt(budgetSection.querySelector('#cfg-budget')?.value)||Config.BUDGET_MYR;
