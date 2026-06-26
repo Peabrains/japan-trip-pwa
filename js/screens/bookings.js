@@ -514,14 +514,14 @@ const BookingsScreen = (() => {
     tAddBtn?.addEventListener('click', addTraveler);
     tInput?.addEventListener('keydown', e => { if (e.key==='Enter') addTraveler(); });
 
-    root.querySelector('#trip-name-save-btn')?.addEventListener('click', async () => {
-      const name = root.querySelector('#trip-name-input')?.value?.trim();
+    tripSection.querySelector('#trip-name-save-btn')?.addEventListener('click', async () => {
+      const name = tripSection.querySelector('#trip-name-input')?.value?.trim();
       if (!name) return;
       await Data.setTripName(name);
       Toast.show('Trip name updated','success');
     });
 
-    root.querySelector('#reset-data-btn')?.addEventListener('click', async () => {
+    resetSection.querySelector('#reset-data-btn')?.addEventListener('click', async () => {
       if (!confirm('NUCLEAR RESET: wipe all data and reseed fresh from built-in itinerary?\n\nThis cannot be undone.')) return;
       Toast.show('Resetting…','info');
       try {
