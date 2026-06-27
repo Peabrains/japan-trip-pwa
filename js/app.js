@@ -238,12 +238,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
   }
-  App.init().catch(e => {
-  const div = document.createElement('div');
-  div.style.cssText = 'position:fixed;top:60px;left:0;right:0;background:#c00;color:#fff;padding:12px 16px;z-index:9999;font-size:12px;font-family:monospace;white-space:pre-wrap;word-break:break-all';
-  div.textContent = 'CRASH: ' + e.message + '
-' + (e.stack || '').slice(0, 300);
-  document.body.appendChild(div);
-});
+  App.init();
 });
 window.App = App;
