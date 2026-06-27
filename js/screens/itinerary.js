@@ -124,7 +124,7 @@ const ItineraryScreen = (() => {
           ${stop.hasStamp ? `<span class="tl-stamp-dot ${stampCollected?'tl-stamp-dot--on':''}">${stop.stampKanji||'判'}</span>` : ''}
         </div>
         <p class="tl-activity">${stop.activity || ''}</p>
-        ${stop.openingHours ? `<p class="tl-hours">${Icons.clock?.('icon-xs')||'🕐'} ${stop.openingHours}</p>` : ''}
+        ${stop.openingHours ? `<p class="tl-hours">◷ ${stop.openingHours}</p>` : ''}
         ${stop.transport ? `<div class="tl-transport">${Icons[iconKey]?Icons[iconKey]():''}<span>${stop.transport}</span></div>` : ''}
         ${stop.transportType==='train' && stop.trainDetail?.jrPass===false
           ? '<p class="tl-platform" style="color:var(--warning-text)">⚠ Not on JR Pass · buy separately</p>'
