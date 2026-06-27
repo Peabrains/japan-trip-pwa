@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
   <meta name="theme-color" content="#C84B35">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -56,7 +56,9 @@
     .stamp-grid::-webkit-scrollbar{display:none}
     /* Prevent iOS auto-zoom on input focus (triggers when font-size < 16px) */
     input,select,textarea{font-size:16px !important;-webkit-text-size-adjust:100%;min-width:0;max-width:100%;box-sizing:border-box}
-    .stamp-dot{width:52px;height:52px;border-radius:50%;border:2px solid var(--border);background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;position:relative;transition:all .2s;-webkit-tap-highlight-color:transparent}
+    /* Remove native iOS time/date input chrome that overflows its container */
+    input[type=time],input[type=date]{-webkit-appearance:none;appearance:none;width:100%}
+    .stamp-dot{width:52px;height:52px;border-radius:50%;border:2px solid var(--border);background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;position:relative;transition:all .2s;-webkit-tap-highlight-color:transparent;touch-action:pan-x}
     .stamp-dot--sanzan{border-color:var(--accent);border-width:2.5px}
     .stamp-dot--collected{background:var(--accent);border-color:var(--accent)}
     .stamp-dot--collected .stamp-kanji,.stamp-dot--collected .stamp-romaji{color:#fff}
