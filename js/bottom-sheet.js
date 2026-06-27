@@ -21,7 +21,7 @@ const BottomSheet = (() => {
     document.body.appendChild(overlay);
     document.body.appendChild(sheet);
 
-    sheet.addEventListener('touchstart', e => { startY = e.touches[0].clientY; }, { passive:true });
+    sheet.addEventListener('touchstart', e => { startY = e.touches[0].clientY; currentY = startY; }, { passive:true });
     sheet.addEventListener('touchmove', e => {
       currentY = e.touches[0].clientY;
       const dy = currentY - startY;
@@ -31,6 +31,30 @@ const BottomSheet = (() => {
       sheet.style.transition = 'transform 0.3s cubic-bezier(0.32,0.72,0,1)';
       if ((currentY - startY) > 90) close(); else sheet.style.transform = 'translateY(0)';
     }, { passive:true });
+  }
+
+  /* ─── Time input auto-formatter ─────────────────────────── */
+  function wireTimeInput(id) {
+    const el = body.querySelector('#' + id);
+    if (!el) return;
+    el.setAttribute('placeholder', 'HH:MM');
+    el.setAttribute('maxlength', '5');
+    el.addEventListener('input', () => {
+      let v = el.value.replace(/[^0-9]/g, '');
+      if (v.length > 4) v = v.slice(0, 4);
+      if (v.length >= 3) v = v.slice(0, 2) + ':' + v.slice(2);
+      el.value = v;
+    });
+    el.addEventListener('blur', () => {
+      const v = el.value;
+      if (v && !/^([01]\d|2[0-3]):[0-5]\d$/.test(v)) {
+        el.style.borderColor = 'var(--danger-text)';
+        el.title = 'Use HH:MM format (e.g. 09:30)';
+      } else {
+        el.style.borderColor = '';
+        el.title = '';
+      }
+    });
   }
 
   function showSheet() {
@@ -289,6 +313,8 @@ const BottomSheet = (() => {
     }
     editTType?.addEventListener('change', updateEditTrainBlock);
     wireAutoduration('e-time', 'e-arrive', 'e-duration-display', 'e-duration');
+    wireTimeInput('e-time');
+    wireTimeInput('e-arrive');
     body.querySelector('#bs-save-btn')?.addEventListener('click', async () => {
       const hasTrain = ['train','plane','boat'].includes(g('e-ttype')||stop.transportType);
       const patch = {
@@ -346,6 +372,8 @@ const BottomSheet = (() => {
     tTypeSelect?.addEventListener('change', updateTrainBlock);
     updateTrainBlock(); // run on open too
     wireAutoduration('a-time', 'a-arrive', 'a-duration-display', 'a-duration');
+    wireTimeInput('a-time');
+    wireTimeInput('a-arrive');
 
     body.querySelector('#bs-add-btn')?.addEventListener('click', async () => {
       const name = g('a-name');
