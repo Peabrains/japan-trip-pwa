@@ -74,7 +74,6 @@ const App = (() => {
         });
         grid.appendChild(dot);
       });
-      scrollWrap.appendChild(grid);
       banner.appendChild(grid);
       banner.insertAdjacentHTML('beforeend', '<p class="stamp-hint">Tap to collect · Red border = Kumano Sanzan</p>');
     }
