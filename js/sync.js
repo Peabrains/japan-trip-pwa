@@ -174,7 +174,11 @@ const Sync = (() => {
       App.renderStampBanner();
       App.updateUrgentBadge();
       window.ItineraryScreen?.refresh?.();
-      window.BookingsScreen?.refresh?.();
+      // Don't re-render if user is actively typing in an input
+      const _focused = document.activeElement;
+      if (!_focused || !['INPUT','TEXTAREA','SELECT'].includes(_focused.tagName)) {
+        window.BookingsScreen?.refresh?.();
+      }
     }
   }
 

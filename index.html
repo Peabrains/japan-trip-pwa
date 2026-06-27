@@ -26,7 +26,7 @@
     /* ── Shell ──────────────────────────────────────────────── */
     html{height:-webkit-fill-available}
     body{min-height:100vh;min-height:-webkit-fill-available;background:var(--surface)}
-    #app{display:flex;flex-direction:column;height:100vh;height:100svh;height:-webkit-fill-available;max-width:480px;margin:0 auto;background:var(--bg);position:relative}
+    #app{display:flex;flex-direction:column;height:100vh;height:100svh;max-width:480px;margin:0 auto;background:var(--bg);position:relative}
 
     /* ── Header ─────────────────────────────────────────────── */
     #app-header{flex-shrink:0;background:var(--surface);border-bottom:1.5px solid var(--border);padding:env(safe-area-inset-top) 0 0}
@@ -53,14 +53,14 @@
     .stamp-chevron{width:16px;height:16px;color:var(--text-muted)}
     .stamp-progress-bar{height:3px;background:var(--surface-raised)}
     .stamp-progress-fill{height:100%;background:var(--accent);transition:width .4s}
-    .stamp-scroll-wrap{overflow-x:scroll;-webkit-overflow-scrolling:touch;touch-action:pan-x;width:100%;scrollbar-width:none}
+    .stamp-scroll-wrap{overflow-x:scroll;-webkit-overflow-scrolling:touch;width:100%;scrollbar-width:none;cursor:grab}
     .stamp-scroll-wrap::-webkit-scrollbar{display:none}
     .stamp-grid{display:inline-flex;gap:8px;padding:var(--s3) var(--s4);min-width:100%}
     /* Prevent iOS auto-zoom on input focus (triggers when font-size < 16px) */
     input,select,textarea{font-size:16px !important;-webkit-text-size-adjust:100%;min-width:0;max-width:100%;box-sizing:border-box}
     /* Remove native iOS time/date input chrome that overflows its container */
     input[type=time],input[type=date]{-webkit-appearance:none;appearance:none;width:100%}
-    .stamp-dot{width:52px;height:52px;border-radius:50%;border:2px solid var(--border);background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;position:relative;transition:all .2s;-webkit-tap-highlight-color:transparent;touch-action:pan-x}
+    .stamp-dot{width:52px;height:52px;border-radius:50%;border:2px solid var(--border);background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;position:relative;transition:all .2s;-webkit-tap-highlight-color:transparent}
     .stamp-dot--sanzan{border-color:var(--accent);border-width:2.5px}
     .stamp-dot--collected{background:var(--accent);border-color:var(--accent)}
     .stamp-dot--collected .stamp-kanji,.stamp-dot--collected .stamp-romaji{color:#fff}
