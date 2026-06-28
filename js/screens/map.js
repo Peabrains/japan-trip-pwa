@@ -1,7 +1,8 @@
 'use strict';
 
 const MapScreen = (() => {
-  let root, map, markersLayer;
+  let root, map, markersLayer, restroomLayer;
+  let showRestrooms = false;
 
   const SEG_COLOR  = { transit:'#AAAAAA', kumano:'#C1440E', nagano:'#7B4EA0', alpine:'#2A7A4B', osaka:'#888888' };
   const SEG_LABEL  = { transit:'Transit', kumano:'Kumano Kodo', nagano:'Nagano · Togakushi', alpine:'Alpine Route · Murodo', osaka:'Osaka' };
@@ -23,6 +24,28 @@ const MapScreen = (() => {
         ${inner}
       </svg>`;
     return L.divIcon({ html: svg, iconSize:[size,size+6], iconAnchor:[size/2,size+6], className:'' });
+  }
+
+  /* --- Restroom layer ---------------------------------------- */
+  function makeRestroomIcon() {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 26 26">
+      <circle cx="13" cy="13" r="12" fill="#2563EB" opacity="0.9"/>
+      <text x="13" y="17" text-anchor="middle" font-size="13" fill="white">WC</text>
+    </svg>`;
+    return L.divIcon({ html:svg, iconSize:[26,26], iconAnchor:[13,13], className:'' });
+  }
+
+  function renderRestrooms() {
+    if (!map) return;
+    if (restroomLayer) { map.removeLayer(restroomLayer); restroomLayer = null; }
+    if (!showRestrooms) return;
+    restroomLayer = L.layerGroup().addTo(map);
+    (Data.getRestrooms?.() || []).forEach(r => {
+      const m = L.marker([r.lat, r.lng], { icon: makeRestroomIcon() });
+      m.bindTooltip(`<strong>WC · ${r.name}</strong>${r.note?'<br><small>'+r.note+'</small>':''}`, {
+        direction:'top', offset:[0,-13], opacity:0.95 });
+      m.addTo(restroomLayer);
+    });
   }
 
   /* ─── Render all markers ─────────────────────────────────── */
@@ -91,7 +114,7 @@ const MapScreen = (() => {
   function render() {
     if (!root) return;
     root.innerHTML = '';
-    root.style.cssText = 'display:flex;flex-direction:column;height:100%;';
+    root.style.cssText = 'display:flex;flex-direction:column;height:100%;position:relative;';
 
     root.appendChild(legend());
 
@@ -99,6 +122,18 @@ const MapScreen = (() => {
     mapEl.id = 'map-container';
     mapEl.style.cssText = 'flex:1;border-radius:var(--r-lg);overflow:hidden;border:1.5px solid var(--border);min-height:0;';
     root.appendChild(mapEl);
+
+    // Restroom toggle button
+    const restroomBtn = document.createElement('button');
+    restroomBtn.className = 'map-wc-btn';
+    restroomBtn.title = 'Restrooms';
+    restroomBtn.textContent = 'WC';
+    restroomBtn.addEventListener('click', () => {
+      showRestrooms = !showRestrooms;
+      restroomBtn.classList.toggle('map-wc-btn--active', showRestrooms);
+      renderRestrooms();
+    });
+    root.appendChild(restroomBtn);
 
     map = L.map('map-container', { zoomControl:true, attributionControl:true });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {

@@ -38,6 +38,7 @@ const Icons = {
   dotsV:       (c) => Icons._svg(`<circle cx="12" cy="5" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/><circle cx="12" cy="19" r="1.2" fill="currentColor"/>`, c),
 
   /* UI */
+  kit:         (c) => Icons._svg(`<rect x="2" y="7" width="20" height="14" rx="2" ry="2" ${S}/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" ${S}/>`, c),
   chevronDown: (c) => Icons._svg(`<path d="m6 9 6 6 6-6" ${S}/>`, c),
   chevronUp:   (c) => Icons._svg(`<path d="m18 15-6-6-6 6" ${S}/>`, c),
   refresh:     (c) => Icons._svg(`<path d="M23 4v6h-6M1 20v-6h6" ${S}/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" ${S}/>`, c),

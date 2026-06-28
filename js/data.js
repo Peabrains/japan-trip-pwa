@@ -443,6 +443,52 @@ const STAMPS_COLLECTED = new Set();
 window._STAMPS_COLLECTED = STAMPS_COLLECTED;
 
 /* ── Data API ────────────────────────────────────────────── */
+
+/* -- Hospitals (nearest by region) -- */
+const HOSPITALS = [
+  {region:'D1 Kushimoto',           name:'くしもと町立病院',         tel:'0735-62-7111', maps:'https://maps.google.com/?q=33.4703,135.7757'},
+  {region:'D2-D4 Kii-Tanabe',       name:'紀南病院 (Kinan Hospital)',  tel:'0739-26-7050', maps:'https://maps.google.com/?q=33.7247,135.3817'},
+  {region:'D5-D7 Hongu / Shingu',   name:'新宮市立医療センター', tel:'0735-22-5311', maps:'https://maps.google.com/?q=33.7305,135.9924'},
+  {region:'D8-D10 Nagano',          name:'長野赤十字病院',         tel:'026-226-4131', note:'English support (For Foreigners desk)', maps:'https://maps.google.com/?q=36.6494,138.1975'},
+  {region:'Alpine (Nagano side)',    name:'市立大町総合病院',       tel:'0261-22-5111', note:'Nearest to Ogizawa entrance', maps:'https://maps.google.com/?q=36.5026,137.8450'},
+  {region:'Alpine (Toyama side)',    name:'富山赤十字病院',         tel:'076-433-2222', note:'Descend west for Murodo emergencies', maps:'https://maps.google.com/?q=36.6928,137.2050'},
+  {region:'D11-D14 Osaka',          name:'大阪赤十字病院',         tel:'06-6774-5111', maps:'https://maps.google.com/?q=34.6631,135.5195'},
+];
+
+/* -- First aid protocols -- */
+const FIRST_AID = [
+  {title:'Blisters',
+   content:'Drain at the edge with a sterile needle. Leave the roof intact. Apply blister plaster (Compeed). Change each morning on trail days.'},
+  {title:'Sprained Ankle',
+   content:'RICE: Rest immediately, Ice/cold water 20 min, Compress, Elevate. Can you bear weight? Yes: tape and continue carefully. No: stop and call for help. Do not walk it off on a remote section.'},
+  {title:'Heat Exhaustion',
+   content:'Move to shade. Remove heavy layers. Sip water slowly. Wet skin with cool water. Rest 30+ min. Emergency (call 119): confusion, no sweating, temp above 40 degrees — this is heatstroke.'},
+  {title:'Altitude Sickness (AMS) — Murodo 2,450m',
+   content:'You ascend Nagano (370m) to Murodo (2,450m) in ~3 hours. Symptoms: headache, nausea, dizziness. Mild: slow down, hydrate, rest at terminal. Do NOT go higher when symptomatic. Severe (confusion, vomiting): descend immediately by cable car. Call 119 if unconscious.'},
+  {title:'Hypothermia — Murodo in April',
+   content:'Snow and sub-zero temps normal at Murodo in April. Signs: shivering, confusion, slurred speech. Get indoors (Murodo Bus Terminal is heated). Remove wet clothing. Warm drinks, shared body heat. Call for help if shivering stops — that means the body has given up warming itself.'},
+];
+
+/* -- Restroom locations (map layer) -- */
+const RESTROOMS = [
+  {name:'Takijiri Kodo-Kan',           lat:33.8827, lng:135.5167, note:'Trailhead info center'},
+  {name:'Takahara village',             lat:33.8893, lng:135.5542, note:'Near shrine'},
+  {name:'Michi-no-eki Nakahechi',       lat:33.8948, lng:135.6253, note:'Open 09:00-17:00'},
+  {name:'Chikatsuyu Experience Center', lat:33.8966, lng:135.6348, note:'In the village'},
+  {name:'Tsugizakura-oji / Nonaka',     lat:33.8916, lng:135.7091, note:'Near shrine'},
+  {name:'Hosshinmon-oji',               lat:33.8444, lng:135.7717, note:'150m off trail on road'},
+  {name:'Kumano Hongu Taisha',          lat:33.8358, lng:135.7913, note:'Shrine grounds'},
+  {name:'Yunomine Onsen',               lat:33.8201, lng:135.7773, note:'Public facilities'},
+  {name:'Kawayu Onsen',                 lat:33.8197, lng:135.8062, note:'Public facilities'},
+  {name:'Daimon-zaka (Nachi approach)', lat:33.6787, lng:135.9062, note:'Cedar path start'},
+  {name:'Nachi Taisha area',            lat:33.6706, lng:135.8992, note:'Shrine complex'},
+  {name:'Togakushi Okusha trailhead',   lat:36.7781, lng:138.0115, note:'Before cedar avenue'},
+  {name:'Ogizawa Station',              lat:36.5668, lng:137.6618, note:'Alpine Route east terminal'},
+  {name:'Kurobe Dam',                   lat:36.5615, lng:137.6543, note:'Dam viewing area'},
+  {name:'Murodo Bus Terminal',          lat:36.5763, lng:137.5985, note:'Multiple facilities'},
+  {name:'Bijodaira Station',            lat:36.5513, lng:137.4765, note:'Cable car station'},
+];
+
 const Data = {
   async init() {
     try {
@@ -583,6 +629,9 @@ const Data = {
   },
 
   getSOS:         () => SOS_DATA,
+  getHospitals:   () => HOSPITALS,
+  getFirstAid:    () => FIRST_AID,
+  getRestrooms:   () => RESTROOMS,
   getOvernight:   (dayId) => OVERNIGHT[dayId] || null,
   getAllOvernight: () => OVERNIGHT,
 
