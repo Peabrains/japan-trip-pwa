@@ -471,22 +471,26 @@ const FIRST_AID = [
 
 /* -- Restroom locations (map layer) -- */
 const RESTROOMS = [
-  {name:'Takijiri Kodo-Kan',           lat:33.8827, lng:135.5167, note:'Trailhead info center'},
-  {name:'Takahara village',             lat:33.8893, lng:135.5542, note:'Near shrine'},
-  {name:'Michi-no-eki Nakahechi',       lat:33.8948, lng:135.6253, note:'Open 09:00-17:00'},
-  {name:'Chikatsuyu Experience Center', lat:33.8966, lng:135.6348, note:'In the village'},
-  {name:'Tsugizakura-oji / Nonaka',     lat:33.8916, lng:135.7091, note:'Near shrine'},
-  {name:'Hosshinmon-oji',               lat:33.8444, lng:135.7717, note:'150m off trail on road'},
-  {name:'Kumano Hongu Taisha',          lat:33.8358, lng:135.7913, note:'Shrine grounds'},
-  {name:'Yunomine Onsen',               lat:33.8201, lng:135.7773, note:'Public facilities'},
-  {name:'Kawayu Onsen',                 lat:33.8197, lng:135.8062, note:'Public facilities'},
-  {name:'Daimon-zaka (Nachi approach)', lat:33.6787, lng:135.9062, note:'Cedar path start'},
-  {name:'Nachi Taisha area',            lat:33.6706, lng:135.8992, note:'Shrine complex'},
-  {name:'Togakushi Okusha trailhead',   lat:36.7781, lng:138.0115, note:'Before cedar avenue'},
-  {name:'Ogizawa Station',              lat:36.5668, lng:137.6618, note:'Alpine Route east terminal'},
-  {name:'Kurobe Dam',                   lat:36.5615, lng:137.6543, note:'Dam viewing area'},
-  {name:'Murodo Bus Terminal',          lat:36.5763, lng:137.5985, note:'Multiple facilities'},
-  {name:'Bijodaira Station',            lat:36.5513, lng:137.4765, note:'Cable car station'},
+  // Nakahechi Trail (D3-D6)
+  {name:'Takijiri Kodo-Kan',            lat:33.8791, lng:135.5140, note:'Trailhead info center, beside bus stop'},
+  {name:'Takahara Shrine area',          lat:33.9031, lng:135.5613, note:'Near Takahara Kumano-jinja'},
+  {name:'Michi-no-eki Nakahechi',        lat:33.9010, lng:135.6150, note:'Roadside rest area, 09:00-17:00'},
+  {name:'Chikatsuyu-oji area',           lat:33.9068, lng:135.6418, note:'In the village'},
+  {name:'Tsugizakura-oji / Nonaka',      lat:33.8873, lng:135.7122, note:'Near the giant cedar shrine'},
+  {name:'Hosshinmon-oji',                lat:33.8484, lng:135.7706, note:'150m off trail on road'},
+  {name:'Kumano Hongu Taisha',           lat:33.8359, lng:135.7912, note:'Shrine grounds'},
+  {name:'Yunomine Onsen',                lat:33.8220, lng:135.7780, note:'Public facilities'},
+  {name:'Kawayu Onsen',                  lat:33.8218, lng:135.8060, note:'Public facilities'},
+  // Nachi / Katsuura (D7-D8)
+  {name:'Daimon-zaka (Nachi approach)',  lat:33.6779, lng:135.8997, note:'Cedar path start, near car park'},
+  {name:'Nachi Taisha / Seigantoji',     lat:33.6703, lng:135.8989, note:'Shrine complex'},
+  // Togakushi (D9)
+  {name:'Togakushi Okusha trailhead',    lat:36.7834, lng:138.0099, note:'Before cedar avenue, beside parking'},
+  // Alpine Route (D10-D11)
+  {name:'Ogizawa Station',               lat:36.5680, lng:137.6638, note:'Alpine Route east terminal'},
+  {name:'Kurobe Dam',                    lat:36.5615, lng:137.6543, note:'Dam observation area'},
+  {name:'Murodo Bus Terminal',           lat:36.5766, lng:137.5986, note:'Multiple facilities at 2,450m'},
+  {name:'Bijodaira Station',             lat:36.5513, lng:137.4765, note:'Cable car station'},
 ];
 
 const Data = {

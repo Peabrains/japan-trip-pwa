@@ -43,7 +43,10 @@ const MapScreen = (() => {
     (Data.getRestrooms?.() || []).forEach(r => {
       const m = L.marker([r.lat, r.lng], { icon: makeRestroomIcon() });
       m.on('click', () => {
-        window.open(`https://maps.google.com/maps?daddr=${r.lat},${r.lng}`, '_blank');
+        const url = `https://maps.google.com/maps?daddr=${r.lat},${r.lng}`;
+        const a = document.createElement('a');
+        a.href = url; a.target = '_blank'; a.rel = 'noopener';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
       });
       m.bindTooltip(`<strong>WC · ${r.name}</strong>${r.note?'<br><small>'+r.note+'</small>':''}`, {
         direction:'top', offset:[0,-13], opacity:0.95 });

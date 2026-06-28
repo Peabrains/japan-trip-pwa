@@ -57,11 +57,11 @@ const Weather = (() => {
     return days;
   }
 
-  function dayCard(d) {
+  const REL_LABELS = ['Today', 'Tomorrow', '+2 days'];
+
+  function dayCard(d, idx) {
     const { label, icon } = wmo(d.code);
-    const dateLabel = new Date(d.date).toLocaleDateString('en-GB', {
-      weekday:'short', day:'numeric', month:'short'
-    });
+    const dateLabel = REL_LABELS[idx] || '+' + idx + ' days';
     const hasRain = d.precipProb != null && d.precipProb > 0;
     const isWet   = hasRain && d.precipProb >= 50;
     const rainLine = hasRain
@@ -84,7 +84,7 @@ const Weather = (() => {
       el.innerHTML = `
         <div class="wx-strip">
           <span class="wx-location">${label}</span>
-          ${days.map(dayCard).join('')}
+          ${days.map((d,i) => dayCard(d,i)).join('')}
         </div>`;
     } catch(_) { el.innerHTML = ''; }
   }
@@ -97,7 +97,7 @@ const Weather = (() => {
       el.innerHTML = allDays.map((days, i) => `
         <div class="wx-strip">
           <span class="wx-location">${points[i].label}</span>
-          ${days.map(dayCard).join('')}
+          ${days.map((d,i) => dayCard(d,i)).join('')}
         </div>`).join('');
     } catch(_) { el.innerHTML = ''; }
   }

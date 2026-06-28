@@ -89,6 +89,7 @@ const App = (() => {
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.screen === name));
 
     const el = document.getElementById('screen-content');
+    el.style.cssText = '';  // clear any inline styles from previous screen (e.g. map sets display:flex)
     el.innerHTML = '';
     el.scrollTop = 0;
     el.classList.toggle('map-active', name === 'map');
