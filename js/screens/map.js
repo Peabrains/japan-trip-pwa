@@ -123,7 +123,7 @@ const MapScreen = (() => {
   function render() {
     if (!root) return;
     root.innerHTML = '';
-    root.style.cssText = 'display:flex;flex-direction:column;overflow:hidden;';
+    root.style.cssText = 'display:flex;flex-direction:column;';
 
     root.appendChild(legend());
 
