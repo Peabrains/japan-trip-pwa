@@ -102,12 +102,12 @@ button { font-family:var(--font); cursor:pointer; }
 svg { fill:none; }
 
 /* ─── Story card ─────────────────────────────────────────────── */
-.story-card { margin:8px var(--s4) 0; border:1.5px solid var(--stamp-border); border-radius:var(--r-lg); background:var(--stamp-bg); overflow:hidden; }
+.story-card { margin:8px var(--s4) 0; border:1.5px solid #DDD9CF; border-radius:var(--r-lg); background:#F5F2EB; overflow:hidden; }
 .story-header { display:flex; align-items:center; gap:10px; padding:12px var(--s4); cursor:pointer; user-select:none; -webkit-user-select:none; }
 .story-icon { font-size:16px; flex-shrink:0; }
 .story-teaser { flex:1; font-size:var(--text-sm); font-weight:500; color:var(--text-secondary); line-height:1.4; }
 .story-chevron { font-size:10px; color:var(--text-muted); flex-shrink:0; }
 .story-body { max-height:0; overflow:hidden; transition:max-height 0.35s ease; }
-.story-prose { padding:0 var(--s4) var(--s4); border-top:1px solid var(--stamp-border); }
+.story-prose { padding:0 var(--s4) var(--s4); border-top:1px solid #DDD9CF; }
 .story-prose p { font-size:var(--text-base); line-height:1.7; color:var(--text-primary); margin-top:var(--s4); }
 .story-prose a { color:var(--accent); text-decoration:underline; text-underline-offset:2px; }
