@@ -1,4 +1,4 @@
-const CACHE = 'japan-trip-v45';
+const CACHE = 'japan-trip-v46';
 
 const PRECACHE = [
   './', './index.html', './css/tokens.css', './css/print.css',
